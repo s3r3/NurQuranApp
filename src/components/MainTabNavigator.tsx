@@ -39,7 +39,6 @@ interface TabItem {
 // Tab configuration
 const TABS: TabItem[] = [
   { key: "home", label: "Home", icon: Book, screen: "HomeScreen" },
-  { key: "qiblat", label: "Qiblat", icon: Compass, screen: "QiblatScreen" },
   { key: "prayer", label: "Prayer", icon: Clock, screen: "PrayerTimesScreen" },
   { key: "fasting", label: "Fasting", icon: Calendar, screen: "FastingScreen" },
   { key: "tasbih", label: "Tasbih", icon: Disc, screen: "TasbihScreen" },
