@@ -2,7 +2,6 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "../screen/homeScreen";
 import PrayerTimeScreen from "../screen/prayerTimeScreen";
-import QiblaScreen from "../screen/qiblatScreen";
 import FastingScreen from "../screen/fastingScreen";
 import TasbihScreen from "../screen/tasbihScreen";
 import BookmarkScreen from "../screen/bookmarkScreen";
@@ -17,7 +16,7 @@ const SCREEN_OPTIONS = { headerShown: false };
 // Types
 export type RootStackParamList = {
   HomeScreen: undefined;
-  QiblatScreen: undefined;
+
   PrayerTimesScreen: undefined;
   FastingScreen: undefined;
   TasbihScreen: undefined;
@@ -34,7 +33,7 @@ const SCREENS: Array<{
   component: React.ComponentType<any>;
 }> = [
   { name: "HomeScreen", component: HomeScreen },
-  { name: "QiblatScreen", component: QiblaScreen },
+
   { name: "PrayerTimesScreen", component: PrayerTimeScreen },
   { name: "FastingScreen", component: FastingScreen },
   { name: "TasbihScreen", component: TasbihScreen },
