@@ -2,19 +2,23 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { FolderOpen } from "lucide-react-native";
 import { COLORS } from "../../constants/colors";
+import { useTranslation } from "react-i18next";
 
 interface CollectionEmptyStateProps {
   message?: string;
 }
 
 export const CollectionEmptyState: React.FC<CollectionEmptyStateProps> = ({
-  message = "No ayahs in this collection yet",
+  message,
 }) => {
+  const { t } = useTranslation();
+  const displayMessage = message || t("No ayahs in this collection yet");
+
   return (
     <View style={styles.container}>
       <FolderOpen color={COLORS.SECONDARY} size={64} strokeWidth={1.5} />
-      <Text style={styles.title}>Empty Collection</Text>
-      <Text style={styles.message}>{message}</Text>
+      <Text style={styles.title}>{t("Empty Collection")}</Text>
+      <Text style={styles.message}>{displayMessage}</Text>
     </View>
   );
 };

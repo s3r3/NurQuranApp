@@ -9,11 +9,12 @@ import { GreetingSection, LastReadCard, HomeTabBar, EmptyState } from "../compon
 import { useHomeData } from "../hooks/useHomeData";
 import { useHomeNavigation } from "../hooks/useHomeNavigation";
 import { useActiveTab } from "../hooks/useActiveTab";
-import { HOME_COLORS } from "../constants/home.constants";
+import { useHomeColors } from "../constants/home.constants";
 import { useTranslation } from "react-i18next";
 
 const HomeScreen = () => {
   const { t } = useTranslation();
+  const colors = useHomeColors();
   const { activeTab, changeTab } = useActiveTab();
   const { surahs, isLoading, isError, error, refetch, hasLastRead, lastReadData } = useHomeData();
   const { navigateToLastRead } = useHomeNavigation();
@@ -36,7 +37,7 @@ const HomeScreen = () => {
   };
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.container}>
+    <SafeAreaView edges={["top"]} style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
       <Header title={t("NurQuran")} />
 
       <GreetingSection />
@@ -55,7 +56,6 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: HOME_COLORS.BACKGROUND,
   },
   contentArea: {
     flex: 1,

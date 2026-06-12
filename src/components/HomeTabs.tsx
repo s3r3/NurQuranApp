@@ -10,7 +10,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { BookOpen, ChevronRight } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import { HOME_COLORS } from "../constants/home.constants";
+import { useHomeColors } from "../constants/home.constants";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { HomeTab, SurahHome } from "../types/quran.types";
 
@@ -46,11 +46,12 @@ const PARA_DATA: Para[] = Array.from({ length: 30 }, (_, index) => {
 export const SurahList: React.FC<SurahListProps> = ({ surahs }) => {
   const navigation = useNavigation<NavigationProp>();
   const { t } = useTranslation();
+  const colors = useHomeColors();
 
   const renderSurahItem = useCallback(
     ({ item }: { item: SurahHome }) => (
       <TouchableOpacity
-        style={styles.listItem}
+        style={[styles.listItem, { borderBottomColor: colors.BORDER }]}
         onPress={() =>
           navigation.navigate("SurahDetail", {
             surahId: item.nomor,
@@ -59,34 +60,34 @@ export const SurahList: React.FC<SurahListProps> = ({ surahs }) => {
         }
         activeOpacity={0.7}
       >
-        <View style={styles.numberBadge}>
-          <Text style={styles.numberText}>{item.nomor}</Text>
+        <View style={[styles.numberBadge, { backgroundColor: colors.PRIMARY }]}>
+          <Text style={[styles.numberText, { color: colors.TEXT_PRIMARY }]}>{item.nomor}</Text>
         </View>
 
         <View style={styles.itemInfo}>
           <View style={styles.nameRow}>
-            <Text style={styles.itemTitle} numberOfLines={1}>
+            <Text style={[styles.itemTitle, { color: colors.TEXT_PRIMARY }]} numberOfLines={1}>
               {item.namaLatin}
             </Text>
-            <Text style={styles.arabicName} numberOfLines={1}>
+            <Text style={[styles.arabicName, { color: colors.PRIMARY }]} numberOfLines={1}>
               {item.nama}
             </Text>
           </View>
 
           <View style={styles.detailRow}>
-            <Text style={styles.itemSub} numberOfLines={1}>
+            <Text style={[styles.itemSub, { color: colors.TEXT_SECONDARY }]} numberOfLines={1}>
               {item.arti}
             </Text>
-            <Text style={styles.itemMeta} numberOfLines={1}>
+            <Text style={[styles.itemMeta, { color: colors.TEXT_SECONDARY }]} numberOfLines={1}>
               {item.tempatTurun} • {item.jumlahAyat} {t("Ayahs")}
             </Text>
           </View>
         </View>
 
-        <ChevronRight color={HOME_COLORS.TEXT_SECONDARY} size={20} />
+        <ChevronRight color={colors.TEXT_SECONDARY} size={20} />
       </TouchableOpacity>
     ),
-    [navigation, t]
+    [colors, navigation, t]
   );
 
   const keyExtractor = useCallback(
@@ -114,11 +115,12 @@ export const SurahList: React.FC<SurahListProps> = ({ surahs }) => {
 export const ParaList: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const { t } = useTranslation();
+  const colors = useHomeColors();
 
   const renderParaItem = useCallback(
     ({ item }: { item: Para }) => (
       <TouchableOpacity
-        style={styles.listItem}
+        style={[styles.listItem, { borderBottomColor: colors.BORDER }]}
         onPress={() =>
           navigation.navigate("JuzDetail", {
             juzId: item.juzNumber,
@@ -126,22 +128,22 @@ export const ParaList: React.FC = () => {
         }
         activeOpacity={0.7}
       >
-        <View style={styles.paraIcon}>
-          <BookOpen color={HOME_COLORS.PRIMARY} size={24} />
+        <View style={[styles.paraIcon, { backgroundColor: colors.ICON_BG }]}>
+          <BookOpen color={colors.PRIMARY} size={24} />
         </View>
 
         <View style={styles.itemInfo}>
-          <Text style={styles.itemTitle}>{item.name}</Text>
-          <Text style={styles.arabicSmall}>{item.arabicName}</Text>
-          <Text style={styles.itemSub}>
+          <Text style={[styles.itemTitle, { color: colors.TEXT_PRIMARY }]}>{item.name}</Text>
+          <Text style={[styles.arabicSmall, { color: colors.PRIMARY }]}>{item.arabicName}</Text>
+          <Text style={[styles.itemSub, { color: colors.TEXT_SECONDARY }]}>
             {t("Read verses in this juz")}
           </Text>
         </View>
 
-        <ChevronRight color={HOME_COLORS.TEXT_SECONDARY} size={20} />
+        <ChevronRight color={colors.TEXT_SECONDARY} size={20} />
       </TouchableOpacity>
     ),
-    [navigation, t]
+    [colors, navigation, t]
   );
 
   const keyExtractor = useCallback((item: Para) => item.id.toString(), []);
@@ -172,11 +174,15 @@ export const HomeTabs: React.FC<HomeTabsProps> = ({ activeTab, surahs }) => {
   );
 };
 
-const ListEmptyText = ({ text }: { text: string }) => (
-  <View style={styles.emptyContainer}>
-    <Text style={styles.emptyText}>{text}</Text>
-  </View>
-);
+const ListEmptyText = ({ text }: { text: string }) => {
+  const colors = useHomeColors();
+
+  return (
+    <View style={styles.emptyContainer}>
+      <Text style={[styles.emptyText, { color: colors.TEXT_SECONDARY }]}>{text}</Text>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -191,19 +197,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 0.5,
-    borderBottomColor: "rgba(141,146,163,0.2)",
   },
   numberBadge: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: HOME_COLORS.PRIMARY,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
   },
   numberText: {
-    color: HOME_COLORS.TEXT_PRIMARY,
     fontSize: 14,
     fontWeight: "700",
   },
@@ -219,19 +222,16 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   itemTitle: {
-    color: HOME_COLORS.TEXT_PRIMARY,
     fontSize: 16,
     fontWeight: "600",
   },
   arabicName: {
-    color: HOME_COLORS.PRIMARY,
     fontSize: 18,
     fontWeight: "500",
     maxWidth: "42%",
     textAlign: "right",
   },
   arabicSmall: {
-    color: HOME_COLORS.PRIMARY,
     fontSize: 14,
     marginBottom: 4,
   },
@@ -242,11 +242,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   itemSub: {
-    color: HOME_COLORS.TEXT_SECONDARY,
     fontSize: 12,
   },
   itemMeta: {
-    color: HOME_COLORS.TEXT_SECONDARY,
     fontSize: 11,
     textAlign: "right",
     maxWidth: "48%",
@@ -255,7 +253,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "rgba(164,74,255,0.1)",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
@@ -266,7 +263,6 @@ const styles = StyleSheet.create({
     paddingVertical: 48,
   },
   emptyText: {
-    color: HOME_COLORS.TEXT_SECONDARY,
     fontSize: 16,
     textAlign: "center",
   },

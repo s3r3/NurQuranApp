@@ -7,7 +7,7 @@ import {
   StatusBar,
   Platform,
 } from "react-native";
-import { COLORS } from "../constants/calendar.constants";
+import { useCalendarColors } from "../constants/calendar.constants";
 import { useFastingCalendar } from "../hooks/useFastingCalendar";
 import { useNotifications } from "../hooks/useNotifications";
 import { useCalendarEvents } from "../hooks/useCalendarEvents";
@@ -26,6 +26,7 @@ import {
 import MainTabNavigator from "../components/MainTabNavigator";
 
 const FastingScreen = () => {
+  const colors = useCalendarColors();
   const {
     selectedYear,
     selectedMonth,
@@ -96,10 +97,15 @@ const FastingScreen = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        { backgroundColor: colors.BACKGROUND },
+      ]}
+    >
       <StatusBar
-        barStyle="light-content"
-        backgroundColor={COLORS.BACKGROUND}
+        barStyle={colors.BACKGROUND === "#FFFFFF" ? "dark-content" : "light-content"}
+        backgroundColor={colors.BACKGROUND}
         translucent={false}
       />
 
@@ -150,7 +156,6 @@ const FastingScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
   grid: {

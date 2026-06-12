@@ -2,12 +2,17 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { PlusSquare, ListFilter } from "lucide-react-native";
 import { COLORS, BOOKMARK_COLORS } from "../../constants/colors";
+import { useTranslation } from "react-i18next";
 
 interface AddCollectionCardProps {
   onPress: () => void;
 }
 
-export const AddCollectionCard: React.FC<AddCollectionCardProps> = ({ onPress }) => {
+export const AddCollectionCard: React.FC<AddCollectionCardProps> = ({
+  onPress,
+}) => {
+  const { t } = useTranslation();
+
   return (
     <TouchableOpacity
       style={styles.container}
@@ -16,7 +21,7 @@ export const AddCollectionCard: React.FC<AddCollectionCardProps> = ({ onPress })
     >
       <View style={styles.leftContent}>
         <PlusSquare color={COLORS.PRIMARY} size={28} />
-        <Text style={styles.addText}>Add new collection</Text>
+        <Text style={styles.addText}>{t("Add new collection")}</Text>
       </View>
       <ListFilter color={COLORS.TEXT} size={24} />
     </TouchableOpacity>

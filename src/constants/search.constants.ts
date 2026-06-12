@@ -1,4 +1,6 @@
-export const SEARCH_COLORS = {
+import { Appearance } from "react-native";
+
+const DARK_SEARCH_COLORS = {
   primary: "#A44AFF",
   background: "#0B1535",
   cardBackground: "rgba(26, 40, 68, 0.4)",
@@ -8,6 +10,29 @@ export const SEARCH_COLORS = {
   border: "rgba(164, 74, 255, 0.2)",
   placeholder: "#8D92A3",
 } as const;
+
+const LIGHT_SEARCH_COLORS = {
+  primary: "#A44AFF",
+  background: "#FFFFFF",
+  cardBackground: "#F7F7FA",
+  inputBackground: "#F1F1F5",
+  text: "#111111",
+  secondaryText: "#666666",
+  border: "rgba(0, 0, 0, 0.1)",
+  placeholder: "#777777",
+} as const;
+
+type SearchColors = Record<keyof typeof DARK_SEARCH_COLORS, string>;
+
+const getSearchColors = () => {
+  return Appearance.getColorScheme() === "light"
+    ? LIGHT_SEARCH_COLORS
+    : DARK_SEARCH_COLORS;
+};
+
+export const SEARCH_COLORS = new Proxy(DARK_SEARCH_COLORS, {
+  get: (_target, prop: keyof SearchColors) => getSearchColors()[prop],
+}) as SearchColors;
 
 export const SEARCH_SIZES = {
   borderRadius: 12,

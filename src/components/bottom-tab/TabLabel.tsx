@@ -1,6 +1,6 @@
 import React from "react";
 import { Text, StyleSheet } from "react-native";
-import { TAB_COLORS, TAB_SIZES } from "../../constants/tabNavigation.constants";
+import { TAB_SIZES, useTabColors } from "../../constants/tabNavigation.constants";
 
 interface TabLabelProps {
   label: string;
@@ -9,11 +9,14 @@ interface TabLabelProps {
 }
 
 export const TabLabel: React.FC<TabLabelProps> = ({ label, isActive, showLabel }) => {
+  const colors = useTabColors();
+
   if (!showLabel && !isActive) return null;
   
   return (
     <Text style={[
       styles.label,
+      { color: isActive ? colors.active : colors.inactive },
       isActive && styles.activeLabel,
       !showLabel && styles.hiddenLabel,
     ]}>
@@ -27,10 +30,8 @@ const styles = StyleSheet.create({
     fontSize: TAB_SIZES.labelSize,
     marginTop: 4,
     fontWeight: "500",
-    color: TAB_COLORS.inactive,
   },
   activeLabel: {
-    color: TAB_COLORS.active,
     fontWeight: "bold",
   },
   hiddenLabel: {

@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Bell } from "lucide-react-native";
-import { PRAYER_COLORS } from "../../constants/prayer.constants";
+import { usePrayerColors } from "../../constants/prayer.constants";
 import { PrayerName } from "../../types/quran.types";
 import { useTranslation } from "react-i18next";
 
@@ -19,21 +19,51 @@ export const PrayerTimeItem: React.FC<PrayerTimeItemProps> = ({
   isNext,
 }) => {
   const { t } = useTranslation();
+  const colors = usePrayerColors();
   const isHighlighted = isActive || isNext;
 
   return (
-    <View style={[styles.container, isHighlighted && styles.highlightedContainer]}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: isHighlighted
+            ? colors.ACTIVE_CARD_BG
+            : colors.CARD_BG,
+        },
+        isHighlighted && { borderColor: colors.ACCENT, borderWidth: 1.5 },
+      ]}
+    >
       <View style={styles.info}>
         <Bell
-          color={isHighlighted ? PRAYER_COLORS.TEXT_PRIMARY : PRAYER_COLORS.PRIMARY}
+          color={isHighlighted ? colors.TEXT_PRIMARY : colors.PRIMARY}
           size={22}
-          fill={isHighlighted ? PRAYER_COLORS.TEXT_PRIMARY : "transparent"}
+          fill={isHighlighted ? colors.TEXT_PRIMARY : "transparent"}
         />
         <View style={styles.textContainer}>
-          <Text style={[styles.name, isHighlighted && styles.highlightedText]}>
+          <Text
+            style={[
+              styles.name,
+              {
+                color: isHighlighted
+                  ? colors.TEXT_PRIMARY
+                  : colors.TEXT_PRIMARY,
+              },
+            ]}
+          >
             {name}
           </Text>
-          <Text style={[styles.status, isHighlighted && styles.highlightedStatus]}>
+          <Text
+            style={[
+              styles.status,
+              {
+                color: isHighlighted
+                  ? colors.TEXT_PRIMARY
+                  : colors.TEXT_SECONDARY,
+                opacity: isHighlighted ? 0.8 : 1,
+              },
+            ]}
+          >
             {isActive
               ? t("Currently running")
               : isNext
@@ -42,7 +72,7 @@ export const PrayerTimeItem: React.FC<PrayerTimeItemProps> = ({
           </Text>
         </View>
       </View>
-      <Text style={[styles.time, isHighlighted && styles.highlightedText]}>
+      <Text style={[styles.time, { color: colors.TEXT_PRIMARY }]}>
         {time || "--:--"}
       </Text>
     </View>
@@ -54,15 +84,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: PRAYER_COLORS.CARD_BG,
     padding: 20,
     borderRadius: 15,
     marginBottom: 12,
-  },
-  highlightedContainer: {
-    backgroundColor: PRAYER_COLORS.ACTIVE_CARD_BG,
-    borderColor: PRAYER_COLORS.ACCENT,
-    borderWidth: 1.5,
   },
   info: {
     flexDirection: "row",
@@ -72,24 +96,14 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
   name: {
-    color: PRAYER_COLORS.TEXT_PRIMARY,
     fontSize: 18,
     fontWeight: "bold",
   },
   status: {
-    color: PRAYER_COLORS.TEXT_SECONDARY,
     fontSize: 13,
   },
   time: {
-    color: PRAYER_COLORS.TEXT_PRIMARY,
     fontSize: 18,
     fontWeight: "bold",
-  },
-  highlightedText: {
-    color: PRAYER_COLORS.TEXT_PRIMARY,
-  },
-  highlightedStatus: {
-    color: PRAYER_COLORS.TEXT_PRIMARY,
-    opacity: 0.8,
   },
 });

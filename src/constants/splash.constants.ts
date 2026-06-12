@@ -1,8 +1,8 @@
-import { Dimensions } from "react-native";
+import { Appearance, Dimensions } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 
-export const SPLASH_COLORS = {
+const DARK_SPLASH_COLORS = {
   background: "#0B1535",
   cardBackground: "#6236CC",
   text: "white",
@@ -12,6 +12,29 @@ export const SPLASH_COLORS = {
   PRIMARY: "#A44AFF",
   SECONDARY: "#8D92A3"
 } as const;
+
+const LIGHT_SPLASH_COLORS = {
+  background: "#FFFFFF",
+  cardBackground: "#A44AFF",
+  text: "#111111",
+  secondaryText: "#666666",
+  buttonBackground: "#A44AFF",
+  buttonText: "white",
+  PRIMARY: "#A44AFF",
+  SECONDARY: "#666666"
+} as const;
+
+type SplashColors = Record<keyof typeof DARK_SPLASH_COLORS, string>;
+
+const getSplashColors = () => {
+  return Appearance.getColorScheme() === "light"
+    ? LIGHT_SPLASH_COLORS
+    : DARK_SPLASH_COLORS;
+};
+
+export const SPLASH_COLORS = new Proxy(DARK_SPLASH_COLORS, {
+  get: (_target, prop: keyof SplashColors) => getSplashColors()[prop],
+}) as SplashColors;
 
 export const SPLASH_SIZES = {
   cardWidth: width * 0.9,

@@ -71,6 +71,7 @@ export const usePrayerNotifications = () => {
         sound: "default",
       });
     }
+   
 
     let scheduledCount = 0;
 

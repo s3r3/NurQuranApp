@@ -1,5 +1,6 @@
 import { Book, Clock, Calendar, Bookmark } from "lucide-react-native";
 import { TabItem, TabKey } from "../types/tabNavigation.types";
+import { useTheme } from "../contexts/ThemeContext";
 
 export const TAB_COLORS = {
   active: "#A44AFF",
@@ -7,6 +8,18 @@ export const TAB_COLORS = {
   background: "#0B1535",
   badge: "#FF4444",
 } as const;
+
+export const useTabColors = () => {
+  const { colors } = useTheme();
+
+  return {
+    active: colors.PRIMARY,
+    inactive: colors.SECONDARY,
+    background: colors.BACKGROUND,
+    badge: colors.COLLECTION_ERROR,
+    border: colors.BORDER,
+  } as const;
+};
 
 export const TAB_SIZES = {
   icon: 26,

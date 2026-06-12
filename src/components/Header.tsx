@@ -35,7 +35,6 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   );
 };
 
-const TEXT_COLOR = "white"; // Hapus atau ubah jadi dinamis
 const ICON_SIZE = 28;
 const PADDING = 20;
 

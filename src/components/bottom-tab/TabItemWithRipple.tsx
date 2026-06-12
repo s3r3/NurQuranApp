@@ -9,9 +9,9 @@ import Animated, {
 import { TabIcon } from "./TabIcon";
 import { TabLabel } from "./TabLabel";
 import { TabItemProps } from "../../types/tabNavigation.types";
-import { TAB_COLORS } from "../../constants/tabNavigation.constants";
+import { useTabColors } from "../../constants/tabNavigation.constants";
 
-const Ripple = ({ delay = 0 }: { delay?: number }) => {
+const Ripple = ({ color, delay = 0 }: { color: string; delay?: number }) => {
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [
@@ -40,7 +40,7 @@ const Ripple = ({ delay = 0 }: { delay?: number }) => {
       style={[
         styles.ripple,
         {
-          backgroundColor: TAB_COLORS.active + "40",
+          backgroundColor: color + "40",
         },
         animatedStyle,
       ]}
@@ -50,6 +50,7 @@ const Ripple = ({ delay = 0 }: { delay?: number }) => {
 
 export const TabItem: React.FC<TabItemProps> = memo(
   ({ tab, isActive, iconSize, showLabel, onPress }) => {
+    const colors = useTabColors();
     const handlePress = () => {
       onPress(tab.key);
     };
@@ -62,9 +63,9 @@ export const TabItem: React.FC<TabItemProps> = memo(
       >
         {isActive && (
           <View style={styles.rippleContainer} pointerEvents="none">
-            <Ripple />
-            <Ripple />
-            <Ripple />
+            <Ripple color={colors.active} />
+            <Ripple color={colors.active} />
+            <Ripple color={colors.active} />
           </View>
         )}
 

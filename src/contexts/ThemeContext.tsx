@@ -12,7 +12,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const colorScheme = useColorScheme();
   const colors = useThemeColors();
-  const isDark = colorScheme === 'dark';
+  const isDark = colorScheme !== 'light';
 
   return (
     <ThemeContext.Provider value={{ colors, isDark }}>

@@ -1,12 +1,14 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { WEEKDAYS, COLORS } from "../../constants/calendar.constants";
+import { WEEKDAYS, useCalendarColors } from "../../constants/calendar.constants";
 
 export const CalendarWeekHeader: React.FC = () => {
+  const colors = useCalendarColors();
+
   return (
     <View style={styles.container}>
       {WEEKDAYS.map((day) => (
-        <Text key={day} style={styles.text}>
+        <Text key={day} style={[styles.text, { color: colors.TEXT_SECONDARY }]}>
           {day}
         </Text>
       ))}
@@ -23,7 +25,6 @@ const styles = StyleSheet.create({
   text: {
     width: "14.28%",
     textAlign: "center",
-    color: "#94A3B8",
     fontWeight: "700",
     fontSize: 12,
   },

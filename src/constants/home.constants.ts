@@ -1,4 +1,5 @@
 import { TabConfig } from "../types/quran.types";
+import { useTheme } from "../contexts/ThemeContext";
 
 export const HOME_TABS: TabConfig[] = [
   { id: 'Surah', label: 'Surah' },
@@ -24,3 +25,20 @@ export const CARD_LAYOUT = {
   BORDER_RADIUS: 20,
   PADDING: 15,
 } as const;
+
+export const useHomeColors = () => {
+  const { colors } = useTheme();
+
+  return {
+    BACKGROUND: colors.BACKGROUND,
+    PRIMARY: colors.PRIMARY,
+    SECONDARY: colors.SECONDARY,
+    CARD_BACKGROUND: colors.CARD_BACKGROUND,
+    TEXT_PRIMARY: colors.TEXT,
+    TEXT_SECONDARY: colors.SECONDARY,
+    ACTIVE_TAB_BORDER: colors.PRIMARY,
+    PINK_ACCENT: colors.PINK_ACCENT,
+    BORDER: colors.BORDER,
+    ICON_BG: colors.HOME_ICON_BG,
+  } as const;
+};

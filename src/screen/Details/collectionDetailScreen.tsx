@@ -20,9 +20,11 @@ import { useCollectionDetail } from "../../hooks/useCollectionDetail";
 import { CollectionDetailRouteParams, AyahItemCollection } from "../../types/quran.types";
 import { getItemKey } from "../../utils/collectionHelpers";
 import { COLORS } from "../../constants/colors";
+import { useTranslation } from "react-i18next";
 
 const CollectionDetailScreen = () => {
   const route = useRoute();
+  const { t } = useTranslation();
   const { collectionId, collectionName } = route.params as CollectionDetailRouteParams;
 
   const {
@@ -44,7 +46,7 @@ const CollectionDetailScreen = () => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Collection not found</Text>
+          <Text style={styles.errorText}>{t("collectionNotFound")}</Text>
         </View>
         <BottomTabBar active="bookmark" />
       </SafeAreaView>

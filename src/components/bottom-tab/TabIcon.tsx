@@ -8,7 +8,7 @@ import Animated, {
 
 import {
   TAB_SIZES,
-  TAB_COLORS,
+  useTabColors,
 } from "../../constants/tabNavigation.constants";
 import { TabIconProps } from "../../types/tabNavigation.types";
 
@@ -20,6 +20,7 @@ export const TabIcon: React.FC<TabIconProps> = ({
   badgeColor,
 }) => {
   const iconSize = isActive ? size + 2 : size;
+  const colors = useTabColors();
 
   const pulseStyle = useAnimatedStyle(() => {
     return {
@@ -48,7 +49,7 @@ export const TabIcon: React.FC<TabIconProps> = ({
     <View style={styles.container}>
       <Icon
         size={iconSize}
-        color={isActive ? TAB_COLORS.active : TAB_COLORS.inactive}
+        color={isActive ? colors.active : colors.inactive}
         strokeWidth={isActive ? 3 : 2}
       />
 
@@ -60,7 +61,7 @@ export const TabIcon: React.FC<TabIconProps> = ({
               pulseStyle,
               {
                 backgroundColor:
-                  badgeColor || TAB_COLORS.badge,
+                  badgeColor || colors.badge,
               },
             ]}
           />
@@ -70,7 +71,7 @@ export const TabIcon: React.FC<TabIconProps> = ({
               styles.badge,
               {
                 backgroundColor:
-                  badgeColor || TAB_COLORS.badge,
+                  badgeColor || colors.badge,
               },
             ]}
           >

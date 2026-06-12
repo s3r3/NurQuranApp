@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { HOME_COLORS, HOME_TABS } from "../../constants/home.constants";
+import { HOME_TABS, useHomeColors } from "../../constants/home.constants";
 import { HomeTab } from "../../types/quran.types";
 import { useTranslation } from "react-i18next";
 
@@ -14,6 +14,7 @@ export const HomeTabBar: React.FC<HomeTabBarProps> = ({
   onTabChange,
 }) => {
   const { t } = useTranslation();
+  const colors = useHomeColors();
 
   return (
     <View style={styles.container}>
@@ -21,13 +22,19 @@ export const HomeTabBar: React.FC<HomeTabBarProps> = ({
         <TouchableOpacity
           key={tab.id}
           onPress={() => onTabChange(tab.id)}
-          style={[styles.tab, activeTab === tab.id && styles.activeTab]}
+          style={[
+            styles.tab,
+            activeTab === tab.id && {
+              borderBottomWidth: 3,
+              borderBottomColor: colors.ACTIVE_TAB_BORDER,
+            },
+          ]}
           activeOpacity={0.7}
         >
           <Text
             style={[
               styles.tabText,
-              activeTab === tab.id && styles.activeTabText,
+              { color: activeTab === tab.id ? colors.TEXT_PRIMARY : colors.TEXT_SECONDARY },
             ]}
           >
             {t(tab.label)}
@@ -50,16 +57,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 8,
   },
-  activeTab: {
-    borderBottomWidth: 3,
-    borderBottomColor: HOME_COLORS.ACTIVE_TAB_BORDER,
-  },
   tabText: {
-    color: HOME_COLORS.TEXT_SECONDARY,
     fontWeight: "600",
     fontSize: 16,
-  },
-  activeTabText: {
-    color: HOME_COLORS.TEXT_PRIMARY,
   },
 });

@@ -9,9 +9,11 @@ import Animated, {
 import { TabIcon } from "./TabIcon";
 import { TabLabel } from "./TabLabel";
 import { TabItemProps } from "../../types/tabNavigation.types";
+import { useTabColors } from "../../constants/tabNavigation.constants";
 
 export const TabItem: React.FC<TabItemProps> = memo(
   ({ tab, isActive, iconSize, showLabel, onPress }) => {
+    const colors = useTabColors();
     const handlePress = () => {
       onPress(tab.key);
     };
@@ -74,7 +76,11 @@ export const TabItem: React.FC<TabItemProps> = memo(
 
         <Animated.View
           pointerEvents="none"
-          style={[styles.activeIndicator, indicatorAnimatedStyle]}
+          style={[
+            styles.activeIndicator,
+            { backgroundColor: colors.active },
+            indicatorAnimatedStyle,
+          ]}
         />
       </TouchableOpacity>
     );
@@ -94,6 +100,5 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: "#A44AFF",
   },
 });

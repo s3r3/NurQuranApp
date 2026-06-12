@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Clock } from "lucide-react-native";
-import { PRAYER_COLORS } from "../../constants/prayer.constants";
+import { usePrayerColors } from "../../constants/prayer.constants";
 import { PrayerInfo, PrayerTimes } from "../../types/quran.types";
 import { useTranslation } from "react-i18next";
 
@@ -19,35 +19,46 @@ export const TodayPrayerCard: React.FC<TodayPrayerCardProps> = ({
   locationName,
 }) => {
   const { t } = useTranslation();
+  const colors = usePrayerColors();
 
-  const prayerTime = nextPrayer?.name && prayerTimes?.[nextPrayer.name]
-    ? prayerTimes[nextPrayer.name]
-    : "";
+  const prayerTime =
+    nextPrayer?.name && prayerTimes?.[nextPrayer.name]
+      ? prayerTimes[nextPrayer.name]
+      : "";
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { backgroundColor: colors.CARD_PRIMARY_BG }]}>
       <View style={styles.cardRow}>
-        <Clock color={PRAYER_COLORS.TEXT_PRIMARY} size={20} opacity={0.7} />
-        <Text style={styles.label}>
+        <Clock color={colors.TEXT_PRIMARY} size={20} opacity={0.7} />
+        <Text style={[styles.label, { color: colors.TEXT_PRIMARY }]}>
           {nextPrayer?.isCurrent ? t("Currently Running") : t("Next Prayer")}
         </Text>
       </View>
-      
-      <Text style={styles.mainTime}>{nextPrayer?.name || "---"}</Text>
-      <Text style={styles.prayerTime}>{prayerTime}</Text>
-      
-      <Text style={styles.countdown}>
-        {nextPrayer?.isCurrent ? countdown : countdown ? `-${countdown}` : t("Waiting for Data")}
+
+      <Text style={[styles.mainTime, { color: colors.TEXT_PRIMARY }]}>
+        {nextPrayer?.name || "---"}
       </Text>
-      
-      <Text style={styles.location}>{locationName}</Text>
+      <Text style={[styles.prayerTime, { color: colors.TEXT_PRIMARY }]}>
+        {prayerTime}
+      </Text>
+
+      <Text style={[styles.countdown, { color: colors.COUNTDOWN_TEXT }]}>
+        {nextPrayer?.isCurrent
+          ? countdown
+          : countdown
+            ? `-${countdown}`
+            : t("Waiting for Data")}
+      </Text>
+
+      <Text style={[styles.location, { color: colors.TEXT_PRIMARY }]}>
+        {locationName}
+      </Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: PRAYER_COLORS.PRIMARY,
     borderRadius: 20,
     padding: 20,
     marginBottom: 20,
@@ -63,31 +74,26 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   label: {
-    color: PRAYER_COLORS.TEXT_PRIMARY,
     marginLeft: 8,
     fontSize: 16,
     opacity: 0.9,
   },
   mainTime: {
-    color: PRAYER_COLORS.TEXT_PRIMARY,
     fontSize: 32,
     fontWeight: "bold",
   },
   prayerTime: {
-    color: PRAYER_COLORS.TEXT_PRIMARY,
     fontSize: 16,
     fontWeight: "500",
     marginTop: 4,
     opacity: 0.9,
   },
   countdown: {
-    color: PRAYER_COLORS.COUNTDOWN_TEXT,
     fontSize: 18,
     fontWeight: "500",
     marginTop: 4,
   },
   location: {
-    color: PRAYER_COLORS.TEXT_PRIMARY,
     opacity: 0.7,
     marginTop: 15,
     fontSize: 14,

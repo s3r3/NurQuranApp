@@ -1,4 +1,4 @@
-import { useColorScheme } from "react-native";
+import { Appearance, useColorScheme } from "react-native";
 import { useMemo } from "react";
 
 // Palet warna untuk Dark Mode
@@ -20,6 +20,8 @@ const DARK_COLORS = {
   BOOKMARK_BORDER: "rgba(141, 146, 163, 0.3)",
   BOOKMARK_COLLECTION_BG: "rgba(26, 40, 68, 0.3)",
   BOOKMARK_PIN: "#FFD700",
+  PINK_ACCENT: "pink",
+  HOME_ICON_BG: "rgba(164,74,255,0.1)",
 } as const;
 
 // Palet warna untuk Light Mode
@@ -41,6 +43,8 @@ const LIGHT_COLORS = {
   BOOKMARK_BORDER: "rgba(0,0,0,0.1)",
   BOOKMARK_COLLECTION_BG: "#F5F5F5",
   BOOKMARK_PIN: "#FFA500",
+  PINK_ACCENT: "#B0005A",
+  HOME_ICON_BG: "rgba(164,74,255,0.12)",
 } as const;
 
 // Hook untuk mendapatkan warna berdasarkan tema
@@ -54,20 +58,55 @@ export const useThemeColors = () => {
   return colors;
 };
 
-// Tetapkan COLORS default untuk backward compatibility
-export const COLORS = DARK_COLORS;
+type AppColors = Record<keyof typeof DARK_COLORS, string>;
+type CollectionColors = {
+  PIN: AppColors["COLLECTION_PIN"];
+  ERROR: AppColors["COLLECTION_ERROR"];
+  ITEM_BG: AppColors["COLLECTION_ITEM_BG"];
+  BORDER: AppColors["COLLECTION_BORDER"];
+};
+type BookmarkColors = {
+  ADD_SECTION_BG: AppColors["BOOKMARK_ADD_SECTION_BG"];
+  ADD_SECTION_BORDER: AppColors["BOOKMARK_ADD_SECTION_BORDER"];
+  BOOKMARK_BORDER: AppColors["BOOKMARK_BORDER"];
+  COLLECTION_BG: AppColors["BOOKMARK_COLLECTION_BG"];
+  PIN: AppColors["BOOKMARK_PIN"];
+};
 
-export const COLLECTION_COLORS = {
-  PIN: DARK_COLORS.COLLECTION_PIN,
-  ERROR: DARK_COLORS.COLLECTION_ERROR,
-  ITEM_BG: DARK_COLORS.COLLECTION_ITEM_BG,
-  BORDER: DARK_COLORS.COLLECTION_BORDER,
-} as const;
+const getThemeColors = () => {
+  return Appearance.getColorScheme() === "light" ? LIGHT_COLORS : DARK_COLORS;
+};
 
-export const BOOKMARK_COLORS = {
-  ADD_SECTION_BG: DARK_COLORS.BOOKMARK_ADD_SECTION_BG,
-  ADD_SECTION_BORDER: DARK_COLORS.BOOKMARK_ADD_SECTION_BORDER,
-  BOOKMARK_BORDER: DARK_COLORS.BOOKMARK_BORDER,
-  COLLECTION_BG: DARK_COLORS.BOOKMARK_COLLECTION_BG,
-  PIN: DARK_COLORS.BOOKMARK_PIN,
-} as const;
+// Backward compatibility untuk file lama yang masih import COLORS statis.
+export const COLORS = new Proxy(DARK_COLORS, {
+  get: (_target, prop: keyof AppColors) => getThemeColors()[prop],
+}) as AppColors;
+
+export const COLLECTION_COLORS = new Proxy({} as CollectionColors, {
+  get: (_target, prop: keyof CollectionColors) => {
+    const colors = getThemeColors();
+    const map: CollectionColors = {
+      PIN: colors.COLLECTION_PIN,
+      ERROR: colors.COLLECTION_ERROR,
+      ITEM_BG: colors.COLLECTION_ITEM_BG,
+      BORDER: colors.COLLECTION_BORDER,
+    };
+
+    return map[prop];
+  },
+}) as CollectionColors;
+
+export const BOOKMARK_COLORS = new Proxy({} as BookmarkColors, {
+  get: (_target, prop: keyof BookmarkColors) => {
+    const colors = getThemeColors();
+    const map: BookmarkColors = {
+      ADD_SECTION_BG: colors.BOOKMARK_ADD_SECTION_BG,
+      ADD_SECTION_BORDER: colors.BOOKMARK_ADD_SECTION_BORDER,
+      BOOKMARK_BORDER: colors.BOOKMARK_BORDER,
+      COLLECTION_BG: colors.BOOKMARK_COLLECTION_BG,
+      PIN: colors.BOOKMARK_PIN,
+    };
+
+    return map[prop];
+  },
+}) as BookmarkColors;

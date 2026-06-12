@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, Switch, ActivityIndicator } from "react-native";
 import { Bell, BellOff } from "lucide-react-native";
-import { COLORS } from "../../constants/calendar.constants";
+import { useCalendarColors } from "../../constants/calendar.constants";
 import { useTranslation } from "react-i18next";
 
 interface NotificationSettingsProps {
@@ -22,17 +22,23 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
   isScheduling,
 }) => {
   const { t } = useTranslation();
+  const colors = useCalendarColors();
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>🔔 {t("Notification Settings")}</Text>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER },
+      ]}
+    >
+      <Text style={[styles.title, { color: colors.TEXT }]}>🔔 {t("Notification Settings")}</Text>
 
       <View style={styles.row}>
         <View style={styles.info}>
-          <Bell color={COLORS.WARNING} size={18} />
+          <Bell color={colors.WARNING} size={18} />
           <View style={styles.textContainer}>
-            <Text style={styles.label}>{t("Fasting Reminders")}</Text>
-            <Text style={styles.desc}>
+            <Text style={[styles.label, { color: colors.TEXT }]}>{t("Fasting Reminders")}</Text>
+            <Text style={[styles.desc, { color: colors.TEXT_SECONDARY }]}>
               {t("Notification the night before fasting day")}
             </Text>
           </View>
@@ -40,17 +46,17 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
         <Switch
           value={fastingEnabled}
           onValueChange={onFastingToggle}
-          trackColor={{ false: "#3E4462", true: COLORS.PRIMARY }}
-          thumbColor="white"
+          trackColor={{ false: colors.SWITCH_TRACK_OFF, true: colors.PRIMARY }}
+          thumbColor={colors.BUTTON_TEXT}
         />
       </View>
 
       <View style={styles.row}>
         <View style={styles.info}>
-          <Bell color={COLORS.SECONDARY} size={18} />
+          <Bell color={colors.SECONDARY} size={18} />
           <View style={styles.textContainer}>
-            <Text style={styles.label}>{t("Important Islamic Days")}</Text>
-            <Text style={styles.desc}>
+            <Text style={[styles.label, { color: colors.TEXT }]}>{t("Important Islamic Days")}</Text>
+            <Text style={[styles.desc, { color: colors.TEXT_SECONDARY }]}>
               {t("Notification before important Islamic days")}
             </Text>
           </View>
@@ -58,30 +64,30 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
         <Switch
           value={eventEnabled}
           onValueChange={onEventToggle}
-          trackColor={{ false: "#3E4462", true: COLORS.PRIMARY }}
-          thumbColor="white"
+          trackColor={{ false: colors.SWITCH_TRACK_OFF, true: colors.PRIMARY }}
+          thumbColor={colors.BUTTON_TEXT}
         />
       </View>
 
-      <View style={styles.status}>
+      <View style={[styles.status, { borderTopColor: colors.BORDER }]}>
         {isScheduling ? (
           <View style={styles.statusRow}>
-            <ActivityIndicator size="small" color={COLORS.PRIMARY} />
-            <Text style={styles.statusText}>
+            <ActivityIndicator size="small" color={colors.PRIMARY} />
+            <Text style={[styles.statusText, { color: colors.TEXT_SECONDARY }]}>
               {t("Scheduling notifications")}...
             </Text>
           </View>
         ) : (
           <View style={styles.statusRow}>
             {scheduledCount > 0 ? (
-              <Bell color={COLORS.SECONDARY} size={14} />
+              <Bell color={colors.SECONDARY} size={14} />
             ) : (
-              <BellOff color={COLORS.ERROR} size={14} />
+              <BellOff color={colors.ERROR} size={14} />
             )}
             <Text
               style={[
                 styles.statusText,
-                { color: scheduledCount > 0 ? COLORS.SECONDARY : COLORS.ERROR },
+                { color: scheduledCount > 0 ? colors.SECONDARY : colors.ERROR },
               ]}
             >
               {scheduledCount > 0
@@ -98,15 +104,12 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
 const styles = StyleSheet.create({
   container: {
     marginHorizontal: 20,
-    backgroundColor: COLORS.CARD_BG,
     borderRadius: 16,
     padding: 18,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: COLORS.BORDER,
   },
   title: {
-    color: COLORS.TEXT,
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 16,
@@ -128,18 +131,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   label: {
-    color: COLORS.TEXT,
     fontSize: 14,
     fontWeight: "600",
   },
   desc: {
-    color: COLORS.TEXT_SECONDARY,
     fontSize: 11,
     marginTop: 2,
   },
   status: {
     borderTopWidth: 1,
-    borderTopColor: "rgba(168, 85, 247, 0.15)",
     paddingTop: 12,
     marginTop: 4,
   },

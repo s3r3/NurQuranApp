@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Share2, Trash2 } from "lucide-react-native";
 import { COLORS, COLLECTION_COLORS } from "../../constants/colors";
 import { AyahItemCollection } from "../../types/quran.types";
+import { useTranslation } from "react-i18next";
 
 interface CollectionAyahItemProps {
   item: AyahItemCollection;
@@ -17,6 +18,8 @@ export const CollectionAyahItem: React.FC<CollectionAyahItemProps> = ({
   onShare,
   onRemove,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -26,7 +29,9 @@ export const CollectionAyahItem: React.FC<CollectionAyahItemProps> = ({
       >
         <View style={styles.header}>
           <Text style={styles.surahName}>{item.surahName}</Text>
-          <Text style={styles.ayahNumber}>Ayah {item.nomorAyat}</Text>
+          <Text style={styles.ayahNumber}>
+            {t("Ayah")} {item.nomorAyat}
+          </Text>
         </View>
         <Text style={styles.ayahText} numberOfLines={3}>
           {item.ayahText}

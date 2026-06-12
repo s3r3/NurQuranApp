@@ -1,7 +1,13 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { Settings } from "lucide-react-native";
-import { PRAYER_COLORS } from "../../constants/prayer.constants";
+import { usePrayerColors } from "../../constants/prayer.constants";
 import { useTranslation } from "react-i18next";
 
 interface PrayerHeaderProps {
@@ -9,17 +15,27 @@ interface PrayerHeaderProps {
   isLoading: boolean;
 }
 
-export const PrayerHeader: React.FC<PrayerHeaderProps> = ({ onRefresh, isLoading }) => {
+export const PrayerHeader: React.FC<PrayerHeaderProps> = ({
+  onRefresh,
+  isLoading,
+}) => {
   const { t } = useTranslation();
+  const colors = usePrayerColors();
 
   return (
     <View style={styles.header}>
-      <Text style={styles.title}>{t("Prayer Times")}</Text>
-      <TouchableOpacity onPress={onRefresh} style={styles.refreshButton} disabled={isLoading}>
+      <Text style={[styles.title, { color: colors.HEADER_TEXT }]}>
+        {t("Prayer Times")}
+      </Text>
+      <TouchableOpacity
+        onPress={onRefresh}
+        style={styles.refreshButton}
+        disabled={isLoading}
+      >
         {isLoading ? (
-          <ActivityIndicator color={PRAYER_COLORS.TEXT_PRIMARY} size="small" />
+          <ActivityIndicator color={colors.TEXT_PRIMARY} size="small" />
         ) : (
-          <Settings color={PRAYER_COLORS.TEXT_PRIMARY} size={24} />
+          <Settings color={colors.TEXT_PRIMARY} size={24} />
         )}
       </TouchableOpacity>
     </View>
@@ -35,7 +51,6 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   title: {
-    color: PRAYER_COLORS.HEADER_TEXT,
     fontSize: 22,
     fontWeight: "bold",
   },

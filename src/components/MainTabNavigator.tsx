@@ -5,7 +5,7 @@ import { TabItem } from "./bottom-tab/TabItem";
 import {
   TABS_CONFIG,
   TAB_SIZES,
-  TAB_COLORS,
+  useTabColors,
 } from "../constants/tabNavigation.constants";
 import { BottomTabBarProps } from "../types/tabNavigation.types";
 import { useTabNavigation } from "../hooks/useTabNavigation";
@@ -17,12 +17,22 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const { navigateToTab } = useTabNavigation();
+  const colors = useTabColors();
 
   const paddingBottom =
     insets.bottom > 0 ? insets.bottom : TAB_SIZES.paddingVertical;
 
   return (
-    <View style={[styles.container, { paddingBottom }]}>
+    <View
+      style={[
+        styles.container,
+        {
+          paddingBottom,
+          backgroundColor: colors.background,
+          borderTopColor: colors.border,
+        },
+      ]}
+    >
       {TABS_CONFIG.map((tab) => (
         <TabItem
           key={tab.key}
@@ -40,12 +50,10 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    backgroundColor: TAB_COLORS.background,
     flexDirection: "row",
     justifyContent: "space-around",
     paddingTop: TAB_SIZES.paddingVertical,
     borderTopWidth: 0.5,
-    borderTopColor: "rgba(141, 146, 163, 0.2)",
   },
 });
 

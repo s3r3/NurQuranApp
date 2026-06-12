@@ -3,6 +3,7 @@ import React from "react";
 import { View, TextInput, StyleSheet, TouchableOpacity } from "react-native";
 import { Search, X } from "lucide-react-native";
 import { COLORS } from "../../constants/colors";
+import { useTranslation } from "react-i18next";
 
 interface BookmarkSearchBarProps {
   value: string;
@@ -15,8 +16,11 @@ export const BookmarkSearchBar: React.FC<BookmarkSearchBarProps> = ({
   value,
   onChangeText,
   onClear,
-  placeholder = "Search bookmarks...",
+  placeholder,
 }) => {
+  const { t } = useTranslation();
+  const displayPlaceholder = placeholder || t("Search bookmarks...");
+
   return (
     <View style={styles.container}>
       <Search color={COLORS.SECONDARY} size={20} />
@@ -24,7 +28,7 @@ export const BookmarkSearchBar: React.FC<BookmarkSearchBarProps> = ({
         style={styles.input}
         value={value}
         onChangeText={onChangeText}
-        placeholder={placeholder}
+        placeholder={displayPlaceholder}
         placeholderTextColor={COLORS.SECONDARY}
       />
       {value.length > 0 && (

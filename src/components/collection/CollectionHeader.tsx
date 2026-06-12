@@ -1,13 +1,14 @@
 import React from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
-import { ArrowLeft, Trash2, MoreVertical, Pin, PinOff } from "lucide-react-native";
+  ArrowLeft,
+  Trash2,
+  MoreVertical,
+  Pin,
+  PinOff,
+} from "lucide-react-native";
 import { COLORS, COLLECTION_COLORS } from "../../constants/colors";
+import { useTranslation } from "react-i18next";
 
 interface CollectionHeaderProps {
   collectionName: string;
@@ -24,23 +25,25 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = ({
   onTogglePin,
   onDelete,
 }) => {
+  const { t } = useTranslation();
+
   const showMenu = () => {
     Alert.alert(
       collectionName,
-      "Collection Options",
+      t("Collection Options"),
       [
         {
-          text: isPinned ? "Unpin Collection" : "Pin Collection",
+          text: isPinned ? t("Unpin Collection") : t("Pin Collection"),
           onPress: onTogglePin,
         },
         {
-          text: "Delete Collection",
+          text: t("Delete Collection"),
           style: "destructive",
           onPress: onDelete,
         },
-        { text: "Cancel", style: "cancel" },
+        { text: t("Cancel"), style: "cancel" },
       ],
-      { cancelable: true }
+      { cancelable: true },
     );
   };
 
@@ -57,7 +60,11 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = ({
       <View style={styles.headerActions}>
         {isPinned && (
           <View style={styles.pinIndicator}>
-            <Pin color={COLLECTION_COLORS.PIN} size={18} fill={COLLECTION_COLORS.PIN} />
+            <Pin
+              color={COLLECTION_COLORS.PIN}
+              size={18}
+              fill={COLLECTION_COLORS.PIN}
+            />
           </View>
         )}
         <TouchableOpacity onPress={showMenu} style={styles.menuButton}>
