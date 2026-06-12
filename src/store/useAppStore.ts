@@ -33,6 +33,15 @@ interface AppStore {
   isFirstTime: boolean;
   completeOnboarding: () => void;
 
+  // ===== OFFLINE MODE =====
+  isOfflineMode: boolean;
+  quranDBReady: boolean;
+  lastSyncTime: number | null;
+  
+  setOfflineMode: (enabled: boolean) => void;
+  setQuranDBReady: (ready: boolean) => void;
+  setLastSyncTime: (time: number) => void;
+
   // ===== QURAN =====
   bookmarks: Bookmark[];
   collections: Collection[];
@@ -95,6 +104,15 @@ export const useAppStore = create<AppStore>()(
       /* ===== ONBOARDING ===== */
       isFirstTime: true,
       completeOnboarding: () => set({ isFirstTime: false }),
+
+      /* ===== OFFLINE MODE ===== */
+      isOfflineMode: true, // Default to offline mode
+      quranDBReady: false,
+      lastSyncTime: null,
+
+      setOfflineMode: (enabled) => set({ isOfflineMode: enabled }),
+      setQuranDBReady: (ready) => set({ quranDBReady: ready }),
+      setLastSyncTime: (time) => set({ lastSyncTime: time }),
 
       /* ===== QURAN ===== */
       bookmarks: [],

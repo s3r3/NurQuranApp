@@ -1,19 +1,23 @@
 import { useState, useCallback } from "react";
 import { useAppStore } from "../store/useAppStore";
 import { usePrayerLocation } from "./usePrayerLocation";
+import { usePrayerOffline } from "./usePrayerOffline";
 import { API_CONFIG } from "../constants/prayer.constants";
 import { PrayerTimesResponse } from "../types/quran.types";
 
 export const usePrayerTimes = () => {
   const { setPrayerData, setLocation } = useAppStore();
   const { getCurrentLocation } = usePrayerLocation();
+  const { cachePrayerData, getCachedPrayerData } = usePrayerOffline();
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isUsingCache, setIsUsingCache] = useState(false);
 
   const fetchPrayerTimes = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    setIsUsingCache(false);
 
     try {
       const locationData = await getCurrentLocation();
@@ -57,6 +61,14 @@ export const usePrayerTimes = () => {
           await response.json();
 
         if (json.code === 200 && json.data) {
+          // Cache the new data
+          await cachePrayerData(
+            json.data.timings,
+            locationData.name,
+            locationData.latitude,
+            locationData.longitude
+          );
+
           setPrayerData(
             json.data.timings,
             locationData.name
@@ -84,6 +96,27 @@ export const usePrayerTimes = () => {
         error
       );
 
+      // Try to load from cache as fallback
+      try {
+        const locationData = await getCurrentLocation();
+        if (locationData) {
+          const cached = await getCachedPrayerData(locationData.name);
+          if (cached) {
+            console.log("📱 Using cached prayer times");
+            setPrayerData(cached.times, locationData.name);
+            setIsUsingCache(true);
+
+            const message = cached.isExpired
+              ? "Showing cached prayer times (expired)"
+              : "Using offline prayer times";
+            setError(message);
+            return;
+          }
+        }
+      } catch (cacheError) {
+        console.error("Failed to load cached prayer times:", cacheError);
+      }
+
       const message =
         error instanceof Error
           ? error.message
@@ -94,11 +127,12 @@ export const usePrayerTimes = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [getCurrentLocation, setPrayerData, setLocation]);
+  }, [getCurrentLocation, setPrayerData, setLocation, cachePrayerData, getCachedPrayerData]);
 
   return {
     fetchPrayerTimes,
     isLoading,
     error,
+    isUsingCache,
   };
 };
