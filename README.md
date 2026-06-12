@@ -52,7 +52,7 @@
         <b>Brand</b>
       </td>
       <td align="center" width="33%">
-        <img src="assets/nur.mp4" />
+        <img src="assets/nur.mp4" alt="NurQuran motion preview" width="180" />
         <br />
         <b>Motion</b>
       </td>
