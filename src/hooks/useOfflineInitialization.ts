@@ -14,38 +14,18 @@ export const useOfflineInitialization = () => {
     const initializeOffline = async () => {
       try {
         setIsInitializing(true);
-        console.log("🚀 Starting offline initialization...");
 
-        // Initialize offline data service
-        await offlineDataService.initialize();
-        console.log("✅ Offline data service initialized");
+        await quranDB.initialize();
 
-        // Check offline status
-        const status = await offlineDataService.getOfflineStatus();
-        setQuranDBReady(status.quranReady);
+        setQuranDBReady(true);
 
-        if (status.lastSyncTime) {
-          setLastSyncTime(status.lastSyncTime);
-        }
-
-        console.log("📊 Offline Status:", {
-          quranReady: status.quranReady,
-          totalDataSize: `${(status.totalDataSize / 1024 / 1024).toFixed(2)}MB`,
-        });
-
-        // Check network connectivity
         const netState = await NetInfo.fetch();
-        setIsConnected(netState.isConnected ?? false);
-        setOfflineMode(!(netState.isConnected ?? false));
 
-        console.log(
-          `🌐 Network Status: ${netState.isConnected ? "Online" : "Offline"}`,
-        );
+        setIsConnected(netState.isConnected ?? false);
+
+        setOfflineMode(!(netState.isConnected ?? false));
       } catch (err) {
-        const errorMsg =
-          err instanceof Error ? err.message : "Unknown error occurred";
-        console.error("❌ Offline initialization error:", errorMsg);
-        setError(errorMsg);
+        console.error(err);
       } finally {
         setIsInitializing(false);
       }

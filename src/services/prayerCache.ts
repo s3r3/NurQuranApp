@@ -6,14 +6,27 @@ interface CachedPrayerData {
   location: string;
   latitude: number;
   longitude: number;
+  dateKey: string;
   timestamp: number;
   expiresAt: number;
 }
 
 const PRAYER_CACHE_KEY = "prayer_times_cache";
-const PRAYER_CACHE_EXPIRY_DAYS = 30;
+
+const getTodayKey = () => new Date().toISOString().slice(0, 10);
+
+const getNextDayTimestamp = () => {
+  const nextDay = new Date();
+  nextDay.setHours(24, 0, 0, 0);
+
+  return nextDay.getTime();
+};
 
 class PrayerCacheService {
+  private getCacheKey(location: string, dateKey = getTodayKey()) {
+    return `${PRAYER_CACHE_KEY}_${location}_${dateKey}`;
+  }
+
   async cachePrayerTimes(
     times: PrayerTimes,
     location: string,
@@ -21,17 +34,19 @@ class PrayerCacheService {
     longitude: number,
   ): Promise<void> {
     try {
+      const dateKey = getTodayKey();
       const cacheData: CachedPrayerData = {
         times,
         location,
         latitude,
         longitude,
+        dateKey,
         timestamp: Date.now(),
-        expiresAt: Date.now() + PRAYER_CACHE_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
+        expiresAt: getNextDayTimestamp(),
       };
 
       await AsyncStorage.setItem(
-        `${PRAYER_CACHE_KEY}_${location}`,
+        this.getCacheKey(location, dateKey),
         JSON.stringify(cacheData),
       );
 
@@ -45,9 +60,15 @@ class PrayerCacheService {
     location: string,
   ): Promise<CachedPrayerData | null> {
     try {
-      const cached = await AsyncStorage.getItem(
-        `${PRAYER_CACHE_KEY}_${location}`,
-      );
+      const todayKey = this.getCacheKey(location);
+      let cached = await AsyncStorage.getItem(todayKey);
+
+      if (!cached) {
+        const legacyCached = await AsyncStorage.getItem(
+          `${PRAYER_CACHE_KEY}_${location}`,
+        );
+        cached = legacyCached || (await this.getLatestCacheForLocation(location));
+      }
 
       if (!cached) {
         return null;
@@ -83,7 +104,11 @@ class PrayerCacheService {
   async clearPrayerCache(location?: string): Promise<void> {
     try {
       if (location) {
-        await AsyncStorage.removeItem(`${PRAYER_CACHE_KEY}_${location}`);
+        const keys = await AsyncStorage.getAllKeys();
+        const locationKeys = keys.filter((key) =>
+          key.startsWith(`${PRAYER_CACHE_KEY}_${location}`),
+        );
+        await AsyncStorage.multiRemove(locationKeys);
       } else {
         // Clear all prayer caches
         const keys = await AsyncStorage.getAllKeys();
@@ -107,6 +132,35 @@ class PrayerCacheService {
       console.error("Error getting cache expiration:", error);
       return null;
     }
+  }
+
+  private async getLatestCacheForLocation(
+    location: string,
+  ): Promise<string | null> {
+    const keys = await AsyncStorage.getAllKeys();
+    const locationKeys = keys.filter((key) =>
+      key.startsWith(`${PRAYER_CACHE_KEY}_${location}_`),
+    );
+
+    if (locationKeys.length === 0) {
+      return null;
+    }
+
+    const cachedItems = await AsyncStorage.multiGet(locationKeys);
+    const latest = cachedItems
+      .map(([, value]) => {
+        if (!value) return null;
+
+        try {
+          return JSON.parse(value) as CachedPrayerData;
+        } catch {
+          return null;
+        }
+      })
+      .filter((item): item is CachedPrayerData => item !== null)
+      .sort((a, b) => b.timestamp - a.timestamp)[0];
+
+    return latest ? JSON.stringify(latest) : null;
   }
 }
 

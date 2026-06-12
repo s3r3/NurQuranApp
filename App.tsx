@@ -12,28 +12,7 @@ import { View, ActivityIndicator, Text, StyleSheet } from "react-native";
 const queryClient = new QueryClient();
 
 function AppContent() {
-  const { isInitializing, error } = useOfflineInitialization();
-
-  if (isInitializing) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#A44AFF" />
-        <Text style={styles.loadingText}>Initializing offline mode...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>⚠️ Initialization Error</Text>
-        <Text style={styles.errorMessage}>{error}</Text>
-        <Text style={styles.errorHint}>
-          App will continue with limited features
-        </Text>
-      </View>
-    );
-  }
+  useOfflineInitialization();
 
   return (
     <NavigationContainer>

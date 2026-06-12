@@ -16,7 +16,15 @@ const HomeScreen = () => {
   const { t } = useTranslation();
   const colors = useHomeColors();
   const { activeTab, changeTab } = useActiveTab();
-  const { surahs, isLoading, isError, error, refetch, hasLastRead, lastReadData } = useHomeData();
+  const {
+    surahs,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    hasLastRead,
+    lastReadData,
+  } = useHomeData();
   const { navigateToLastRead } = useHomeNavigation();
 
   useEffect(() => {
@@ -31,6 +39,16 @@ const HomeScreen = () => {
   const renderContent = () => {
     if (isError) {
       return <EmptyState error={error} onRetry={refetch} />;
+    }
+
+    if (activeTab === "Surah" && isLoading) {
+      return (
+        <EmptyState
+          isLoading
+          message={`${t("Loading surahs")}...`}
+          progress={undefined}
+        />
+      );
     }
 
     return <HomeTabs activeTab={activeTab} surahs={surahs} />;

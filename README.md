@@ -1,117 +1,296 @@
-# Islamic Mobile App: Quran, Prayer & Fasting Tools
-A TypeScript-powered React Native application for daily Islamic practices, built from the components and utilities shared in this repository.
+<div align="center">
+  <img src="assets/1.png" alt="NurQuran logo" width="112" />
+
+  <h1>NurQuran</h1>
+
+  <p>
+    A modern Islamic companion app for reading Quran, tracking prayer times,
+    managing fasting reminders, and saving ayahs for daily reflection.
+  </p>
+
+  <p>
+    <img src="https://readme-typing-svg.demolab.com?font=Inter&weight=600&size=20&duration=2600&pause=900&color=A44AFF&center=true&vCenter=true&width=720&lines=Hybrid+online+%2B+offline+Quran+reader;Prayer+times+with+daily+cache;Fasting+calendar+and+Islamic+events;English+%2B+Indonesian+localization" alt="NurQuran animated intro" />
+  </p>
+
+  <p>
+    <img alt="Expo" src="https://img.shields.io/badge/Expo-54-000020?style=for-the-badge&logo=expo&logoColor=white" />
+    <img alt="React Native" src="https://img.shields.io/badge/React%20Native-0.81-61DAFB?style=for-the-badge&logo=react&logoColor=111111" />
+    <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
+    <img alt="SQLite" src="https://img.shields.io/badge/SQLite-offline-003B57?style=for-the-badge&logo=sqlite&logoColor=white" />
+  </p>
+
+  <p>
+    <img alt="i18n" src="https://img.shields.io/badge/i18n-English%20%2B%20Indonesian-22C55E?style=flat-square" />
+    <img alt="Offline first" src="https://img.shields.io/badge/Quran-hybrid%20offline-A44AFF?style=flat-square" />
+    <img alt="Prayer cache" src="https://img.shields.io/badge/Prayer-daily%20cache-F59E0B?style=flat-square" />
+    <img alt="Notifications" src="https://img.shields.io/badge/Notifications-enabled-EF4444?style=flat-square" />
+    <img alt="License" src="https://img.shields.io/badge/License-MIT-white?style=flat-square" />
+  </p>
+</div>
 
 ---
 
-## Project Overview
-This repository contains reusable UI components, utility functions, hooks, and localization files for a comprehensive Islamic mobile app featuring:
-- Quran reader support
-- Prayer time tracking
-- Fasting & Islamic calendar
-- Bookmark management for saved ayahs
-- Multi-language (English/Indonesian) localization
-- Consistent error/loading state design system
+## Preview
+
+<div align="center">
+  <img src="docs/nurquran-flow.gif" alt="NurQuran hybrid offline flow demo" width="640" />
+</div>
+
+<br />
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="33%">
+        <img src="assets/3.png" alt="NurQuran splash preview" width="180" />
+        <br />
+        <b>Splash</b>
+      </td>
+      <td align="center" width="33%">
+        <img src="assets/1.png" alt="NurQuran app icon" width="180" />
+        <br />
+        <b>Brand</b>
+      </td>
+      <td align="center" width="33%">
+        <img src="https://readme-typing-svg.demolab.com?font=Inter&weight=700&size=18&duration=2000&pause=600&color=22C55E&center=true&vCenter=true&width=260&height=120&lines=Read;Reflect;Remember;Repeat" alt="NurQuran motion preview" />
+        <br />
+        <b>Motion</b>
+      </td>
+    </tr>
+  </table>
+</div>
 
 ---
 
-## Key Files & Components Breakdown
-All provided project files are organized as follows:
-### Reusable UI Components
-| Component | File Path | Purpose |
-|---|---|---|
-| StarSVG | `assets/svg/StarSVG.tsx` | Decorative star icon used for splash screen and accent elements |
-| BookmarkSectionHeader | `src/components/bookmark/BookmarkSectionHeader.tsx` | Section header for bookmark collection lists |
-| ErrorState | `src/components/ErrorState.tsx` | Shared error screen with retry button for failed API/data loads |
-| CalendarHeader / CalendarWeekHeader | `src/components/fasting/` | Header and weekday row components for the Islamic fasting calendar |
-| LoadingState | `src/components/fasting/LoadingState.tsx` | Standardized loading screen with activity indicator |
-| PrayerHeader | `src/components/prayer/PrayerHeader.tsx` | Top header for prayer times screen with refresh and settings controls |
-| GreetingSection | `src/components/home/GreetingSection.tsx` | Time-based personalized greeting (Good Morning/Afternoon/Evening) for the home screen |
-| SearchStats | `src/components/search/SearchStats.tsx` | Search loading state and results count display |
-| DecorativeStars | `src/components/splash/DecorativeStars.tsx` | Animated star background for the app splash screen |
+## What Makes It Different
 
-### Utilities & Helpers
-| File Path | Purpose |
+NurQuran is built as a **hybrid online/offline** app:
+
+- When the user has internet, the app stays online and can refresh dynamic data.
+- Quran data is downloaded into SQLite in the background.
+- While the offline Quran download is still running, users can read from the API immediately.
+- After the Quran database is complete, Quran reading works offline from SQLite.
+- Prayer times are cached per day so the app does not hit the API again and again.
+- Fasting calendar data is cached per year for offline access.
+- Bookmarks and collections are stored locally.
+
+---
+
+## Features
+
+| Area | Highlights |
 |---|---|
-| `src/utils/bookmarkHelpers.ts` | Functions for sorting, filtering, and managing bookmark collections |
-| `src/utils/collectionHelpers.ts` | Helpers for collection item counting and shareable content formatting |
-| `src/components/preloadQuranData.ts` | Pre-fetches Quran surah data from the public [equran.id API](https://equran.id/api/v2/) on app launch |
-
-### Custom React Hooks
-Located in `src/hooks/`:
-1.  `useBookmarkScreen.ts`: Business logic for bookmark screen navigation and management
-2.  `useHomeNavigation.ts`: Navigation helpers for home screen actions (surah detail, last read, search)
-3.  `useSplashNavigation.ts`: Handles post-splash screen navigation and onboarding completion
-
-### Design & Localization
-| Path | Purpose |
-|---|---|
-| `src/constants/` | Color palettes and static design data split across screen-specific files |
-| `src/locales/en.json` / `src/locales/id.json` | English and Indonesian translation strings for app UI text |
-| `src/types/` | TypeScript type definitions for Quran content, search results, and bookmarks |
-| `src/contexts/ThemeContext.tsx` | App-wide theme and color scheme provider |
+| Quran Reader | Surah list, surah detail, ayah translation, share, bookmark, full surah playback |
+| Offline Quran | SQLite import from API, background download, API fallback before download completes |
+| Prayer Times | Location-based prayer schedule, daily cache, offline fallback |
+| Fasting Calendar | Islamic calendar, fasting events, yearly cache, notification reminders |
+| Bookmarks | Saved ayahs, custom collections, pinned collection support |
+| Localization | English and Indonesian UI, flexible language handling |
+| Audio | Qari selection, single ayah playback, full surah playback controls |
+| UX | Splash animation, loading/error states, bottom navigation, themed screens |
 
 ---
 
-## Getting Started (For Full App Functionality)
+## Tech Stack
+
+<div align="center">
+
+| Layer | Tools |
+|---|---|
+| Mobile | Expo, React Native, React 19 |
+| Language | TypeScript |
+| State | Zustand |
+| Server State | TanStack Query |
+| Local Storage | AsyncStorage, Expo SQLite |
+| Network | Axios, Fetch API, NetInfo |
+| Location | Expo Location |
+| Notifications | Expo Notifications |
+| Localization | i18next, react-i18next, Expo Localization |
+| Motion | React Native Reanimated |
+| Icons | lucide-react-native |
+
+</div>
+
+---
+
+## Offline Architecture
+
+```mermaid
+flowchart TD
+  A[App Launch] --> B{Internet Available?}
+  B -->|Yes| C[Load online data when needed]
+  B -->|No| D[Use local cache]
+
+  C --> E[Quran Surah List from API if SQLite not ready]
+  E --> F[Background Quran Import]
+  F --> G[(SQLite Quran Database)]
+  G --> H[Read Quran Offline]
+
+  C --> I[Prayer Times API]
+  I --> J[(Daily AsyncStorage Cache)]
+  J --> K[Offline Prayer Fallback]
+
+  C --> L[Fasting Calendar API]
+  L --> M[(Yearly AsyncStorage Cache)]
+  M --> N[Offline Fasting Calendar]
+
+  O[Bookmarks and Collections] --> P[(Zustand Persist + AsyncStorage)]
+```
+
+---
+
+## Project Structure
+
+```txt
+nurquran/
+├─ assets/                     # App icons, splash images, SVG assets
+├─ src/
+│  ├─ api/                     # Quran and Juz API clients
+│  ├─ animations/              # Splash and UI animation helpers
+│  ├─ components/              # Shared and screen-specific components
+│  │  ├─ bookmark/
+│  │  ├─ collection/
+│  │  ├─ fasting/
+│  │  ├─ home/
+│  │  ├─ prayer/
+│  │  ├─ search/
+│  │  └─ surah/
+│  ├─ constants/               # Colors, screen configs, qari data
+│  ├─ contexts/                # Theme provider
+│  ├─ hooks/                   # Feature hooks and business logic
+│  ├─ locales/                 # English and Indonesian translations
+│  ├─ navigation/              # Native stack navigation
+│  ├─ screen/                  # Main app screens
+│  ├─ services/                # SQLite, cache, offline services
+│  ├─ store/                   # Zustand app store
+│  ├─ types/                   # TypeScript types
+│  └─ utils/                   # Helpers for Quran, audio, search, calendar
+├─ App.tsx
+├─ app.json
+├─ package.json
+└─ README.md
+```
+
+---
+
+## Getting Started
+
 ### Prerequisites
-1.  Set up your React Native development environment via the [official React Native guide](https://reactnative.dev/docs/environment-setup)
-2.  Install Node.js 16+ and a package manager (npm/yarn)
 
-### Required Missing Files
-Some critical files are not included in this repository:
-1.  `src/store/useAppStore.ts`: Zustand state management store for app state (bookmarks, surah data, onboarding status)
-2.  `src/navigation/AppNavigator.ts`: React Native navigation stack definition
-3.  `src/constants/colors.ts`: Centralized global color constants imported across most components
-4.  Screen-specific constant files like `src/constants/prayer.constants.ts`, `src/constants/search.constants.ts` referenced in component imports
+- Node.js 18 or newer
+- npm
+- Expo development environment
+- Android Studio or Xcode if running on an emulator/simulator
 
-You can create these files using standard React Native + Zustand + React Navigation templates, or reference existing open-source implementations.
+### Install
 
-### Standard Installation Steps
-Once all required files are added:
-1.  Clone this repository and navigate to the project folder
-2.  Install dependencies:
-    ```bash
-    npm install
-    # or
-    yarn install
-    ```
-3.  Install iOS pods (for iOS development):
-    ```bash
-    cd ios && pod install && cd ..
-    ```
-4.  Run the app:
-    ```bash
-    # Android
-    npm run android
+```bash
+npm install
+```
 
-    # iOS
-    npm run ios
-    ```
+### Run
+
+```bash
+npm run start
+```
+
+Run directly on a target:
+
+```bash
+npm run android
+npm run ios
+npm run web
+```
 
 ---
 
-## Customization Using Existing Files
-### Update App Design
-Modify the color palettes in the existing `src/constants/` files:
-- `home.constants.ts`: Home screen and tab design colors
-- `calendar.constants.ts`: Fasting calendar UI colors
-- Update `src/contexts/ThemeContext.tsx` to extend global theming support
+## Useful Scripts
 
-### Add New Languages
-1.  Create a new JSON translation file in `src/locales/` (e.g. `es.json` for Spanish)
-2.  Match the key structure from `en.json` or `id.json` and add translated strings
-3.  Update your i18next configuration to register the new language
+| Command | Description |
+|---|---|
+| `npm run start` | Start Expo dev server |
+| `npm run android` | Open on Android |
+| `npm run ios` | Open on iOS |
+| `npm run web` | Open web preview |
+| `npx tsc --noEmit --pretty false` | Type-check the project |
 
-### Modify Splash Screen
-Adjust the splash screen's star styling and placement:
-1.  Update `assets/svg/StarSVG.tsx` to change the star icon design
-2.  Modify `src/components/splash/DecorativeStars.tsx` to adjust star positions and opacity
-3.  Add a `src/constants/splash.constants.ts` file to define adjustable star sizing and positioning
+---
 
-### Update Quran Data Source
-Change the default Quran API endpoint in `src/components/preloadQuranData.ts` to use a different public Quran API.
+## Data Strategy
+
+| Data | Source | Local Strategy |
+|---|---|---|
+| Quran metadata | equran.id | SQLite |
+| Quran ayahs | equran.id | SQLite after background import |
+| English translation | AlQuran Cloud | API fallback/cache through query flow |
+| Prayer times | AlAdhan | Daily AsyncStorage cache |
+| Fasting calendar | AlAdhan calendar endpoint | Yearly AsyncStorage cache |
+| Bookmarks | User input | Zustand persist |
+| Collections | User input | Zustand persist |
+
+---
+
+## Localization
+
+NurQuran supports:
+
+- English
+- Indonesian
+
+Language is detected from the device. Indonesian uses Indonesian UI and Quran meaning text. Other languages fall back to English behavior.
+
+Translation files:
+
+```txt
+src/locales/en.json
+src/locales/id.json
+```
+
+---
+
+## Core Files
+
+| File | Purpose |
+|---|---|
+| `src/components/preloadQuranData.ts` | Loads online surah list first, then imports Quran offline in the background |
+| `src/services/quranDatabase.ts` | SQLite schema, Quran import, and offline Quran queries |
+| `src/hooks/useSurahDetail.ts` | Reads surah detail from SQLite, falls back to API while download is incomplete |
+| `src/services/prayerCache.ts` | Daily prayer time cache |
+| `src/services/fastingCalendarCache.ts` | Yearly fasting calendar cache |
+| `src/store/useAppStore.ts` | Global app state, bookmarks, Quran download state, prayer state |
+| `src/utils/surahMeaning.ts` | English/Indonesian surah meaning display helper |
+
+---
+
+## Roadmap
+
+- [ ] Add real app demo GIF to `docs/demo.gif`
+- [ ] Add screenshots for home, surah detail, prayer, fasting, bookmarks
+- [ ] Add Quran offline download progress indicator in settings
+- [ ] Add manual sync button for Quran data
+- [ ] Add offline audio download option
+- [ ] Add more translations
+- [ ] Add automated tests for cache and offline behavior
+
+---
+
+## Contributing
+
+Pull requests are welcome. Keep changes focused, typed, and consistent with the existing React Native patterns.
+
+Recommended check before submitting:
+
+```bash
+npx tsc --noEmit --pretty false
+```
 
 ---
 
 ## License
-This project is available under the MIT open-source license. You are free to use, modify, and distribute it for personal or commercial projects.
+
+MIT License. Use it, customize it, and make it better.
+
+<div align="center">
+  <br />
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:A44AFF,100:22C55E&height=120&section=footer" alt="footer wave" />
+</div>

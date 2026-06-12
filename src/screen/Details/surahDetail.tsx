@@ -89,7 +89,7 @@ const SurahDetail = () => {
   useEffect(() => {
     if (surah && nomorAyat) {
       const ayatIndex = surah.ayat.findIndex(
-        (ayat) => ayat.nomorAyat === nomorAyat,
+        (ayat: any) => ayat.nomorAyat === nomorAyat,
       );
       if (ayatIndex !== -1 && flatListRef.current) {
         setTimeout(() => {
@@ -102,6 +102,12 @@ const SurahDetail = () => {
       }
     }
   }, [surah, nomorAyat]);
+  console.log(
+    "LANGUAGE:",
+    language,
+    "I18N:",
+    i18n.language
+  );
 
   const handleShare = async (item: any) => {
     try {

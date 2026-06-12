@@ -1,242 +1,409 @@
 import * as SQLite from "expo-sqlite";
-import * as FileSystem from "expo-file-system";
 import { Quran, AyahData } from "../types/quran.types";
 
 const DB_NAME = "quran.db";
-const DB_VERSION = 1;
-const QURAN_JSON_URL = "https://api.quran.com/api/v4/quran/verses";
+
+type QuranImportProgress = {
+  completed: number;
+  total: number;
+};
 
 class QuranDatabaseService {
   private db: SQLite.SQLiteDatabase | null = null;
   private isInitialized = false;
+  private initPromise: Promise<void> | null = null;
+  private isImporting = false;
 
-  async initialize(): Promise<void> {
-    if (this.isInitialized && this.db) {
-      return;
-    }
+  async initialize() {
+  console.log("🔵 initialize called");
 
-    try {
-      this.db = await SQLite.openDatabaseAsync(DB_NAME);
-      await this.createTables();
-      this.isInitialized = true;
-      console.log("✅ Quran database initialized");
-    } catch (error) {
-      console.error("❌ Failed to initialize quran database:", error);
-      throw error;
-    }
+  if (this.isInitialized && this.db) {
+    console.log("🟢 DB already initialized");
+    return;
   }
 
-  private async createTables(): Promise<void> {
+  if (this.initPromise) {
+    console.log("🟡 Waiting existing initialization");
+    return this.initPromise;
+  }
+
+  this.initPromise = (async () => {
+    console.log("🟠 Opening database");
+
+    this.db = await SQLite.openDatabaseAsync(DB_NAME);
+
+    console.log("🟠 Creating tables");
+
+    await this.createTables();
+
+    this.isInitialized = true;
+
+    console.log("✅ Quran DB Ready");
+  })();
+
+  await this.initPromise;
+}
+
+  private async createTables() {
     if (!this.db) throw new Error("Database not initialized");
 
-    try {
-      await this.db.execAsync(`
-        CREATE TABLE IF NOT EXISTS surahs (
-          id INTEGER PRIMARY KEY,
-          nomor INTEGER UNIQUE,
-          nama TEXT,
-          namaLatin TEXT,
-          jumlahAyat INTEGER,
-          tempatTurun TEXT,
-          arti TEXT
-        );
+    await this.db.execAsync(`
+      CREATE TABLE IF NOT EXISTS surahs (
+        nomor INTEGER PRIMARY KEY,
+        nama TEXT NOT NULL,
+        namaLatin TEXT NOT NULL,
+        jumlahAyat INTEGER NOT NULL,
+        tempatTurun TEXT,
+        arti TEXT
+      );
 
-        CREATE TABLE IF NOT EXISTS ayats (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          nomorSurah INTEGER NOT NULL,
-          nomorAyat INTEGER NOT NULL,
-          teksArab TEXT,
-          teksLatin TEXT,
-          teksIndonesia TEXT,
-          FOREIGN KEY(nomorSurah) REFERENCES surahs(nomor),
-          UNIQUE(nomorSurah, nomorAyat)
-        );
+      CREATE TABLE IF NOT EXISTS ayats (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nomorSurah INTEGER NOT NULL,
+        nomorAyat INTEGER NOT NULL,
+        teksArab TEXT,
+        teksLatin TEXT,
+        teksIndonesia TEXT,
+        UNIQUE(nomorSurah, nomorAyat)
+      );
 
-        CREATE TABLE IF NOT EXISTS db_metadata (
-          key TEXT PRIMARY KEY,
-          value TEXT
-        );
+      CREATE TABLE IF NOT EXISTS db_metadata (
+        key TEXT PRIMARY KEY,
+        value TEXT
+      );
 
-        CREATE INDEX IF NOT EXISTS idx_surah_nomor ON surahs(nomor);
-        CREATE INDEX IF NOT EXISTS idx_ayat_surah_nomor ON ayats(nomorSurah);
-        CREATE INDEX IF NOT EXISTS idx_ayat_nomor ON ayats(nomorAyat);
-      `);
+      CREATE INDEX IF NOT EXISTS idx_surah
+      ON ayats(nomorSurah);
 
-      console.log("✅ Quran tables created");
-    } catch (error) {
-      console.error("❌ Failed to create tables:", error);
-      throw error;
-    }
+      CREATE INDEX IF NOT EXISTS idx_ayat
+      ON ayats(nomorAyat);
+    `);
   }
 
   async hasQuranData(): Promise<boolean> {
     if (!this.db) await this.initialize();
 
-    try {
-      const result = await this.db?.getFirstAsync<{ count: number }>(
-        "SELECT COUNT(*) as count FROM surahs"
-      );
-      return (result?.count ?? 0) > 0;
-    } catch (error) {
-      console.error("Error checking quran data:", error);
-      return false;
-    }
+    const result = await this.db!.getFirstAsync<{
+      count: number;
+    }>(
+      `
+      SELECT COUNT(*) as count
+      FROM surahs
+      `,
+    );
+
+    return (result?.count ?? 0) > 0;
   }
 
-  async importQuranFromAPI(): Promise<void> {
+  async isQuranImported(): Promise<boolean> {
     if (!this.db) await this.initialize();
 
+    const result = await this.db!.getFirstAsync<{
+      value: string;
+    }>(
+      `
+        SELECT value
+        FROM db_metadata
+        WHERE key = ?
+        `,
+      ["quran_imported"],
+    );
+
+    return result?.value === "true";
+  }
+
+  async clearDatabase() {
+    if (!this.db) await this.initialize();
+
+    await this.db!.execAsync(`
+      DELETE FROM ayats;
+      DELETE FROM surahs;
+      DELETE FROM db_metadata;
+    `);
+  }
+
+  async importQuranFromAPI(
+    onProgress?: (progress: QuranImportProgress) => void,
+  ): Promise<void> {
+    if (this.isImporting) {
+      console.log("⏳ Import already running");
+      return;
+    }
+
+    this.isImporting = true;
+
     try {
-      console.log("📥 Downloading Quran data from API...");
+      if (!this.db) {
+        await this.initialize();
+      }
 
-      // Download surahs list
-      const surahResponse = await fetch("https://api.quran.com/api/v4/quran/1");
-      const surahData = await surahResponse.json();
+      console.log("📥 Fetching surah list...");
 
-      // Insert surahs
-      for (const surah of surahData.quran) {
-        await this.db?.runAsync(
-          `INSERT OR REPLACE INTO surahs (nomor, nama, namaLatin, jumlahAyat, tempatTurun, arti)
-           VALUES (?, ?, ?, ?, ?, ?)`,
+      const response = await fetch("https://equran.id/api/v2/surat");
+
+      const json = await response.json();
+
+      if (!json?.data) {
+        throw new Error("Invalid API response");
+      }
+
+      const surahs = json.data;
+      const totalSurahs = surahs.length;
+
+      onProgress?.({
+        completed: 0,
+        total: totalSurahs,
+      });
+
+      for (const surah of surahs) {
+        await this.db!.runAsync(
+          `
+          INSERT OR REPLACE INTO surahs
+          (
+            nomor,
+            nama,
+            namaLatin,
+            jumlahAyat,
+            tempatTurun,
+            arti
+          )
+          VALUES (?, ?, ?, ?, ?, ?)
+          `,
           [
-            surah.number,
-            surah.name,
-            surah.englishName,
-            surah.numberOfAyahs,
-            surah.revelationType,
-            surah.transliteration,
-          ]
+            surah.nomor,
+            surah.nama,
+            surah.namaLatin,
+            surah.jumlahAyat,
+            surah.tempatTurun,
+            surah.arti,
+          ],
         );
       }
 
-      console.log("✅ Surahs imported");
+      console.log("✅ Surah metadata saved");
 
-      // Download verses in batches
-      const totalSurahs = surahData.quran.length;
-      for (let surahNum = 1; surahNum <= totalSurahs; surahNum++) {
+      for (const surah of surahs) {
         try {
-          const verseResponse = await fetch(
-            `https://api.quran.com/api/v4/quran/verses/quran_${surahNum}`
+          console.log(`📥 Importing Surah ${surah.nomor}`);
+
+          const detailResponse = await fetch(
+            `https://equran.id/api/v2/surat/${surah.nomor}`,
           );
-          const verseData = await verseResponse.json();
 
-          if (verseData.verses) {
-            for (const verse of verseData.verses) {
-              const translation = verseData.translations?.find(
-                (t: any) => t.language_name === "Indonesian"
-              );
+          const detailJson = await detailResponse.json();
 
-              await this.db?.runAsync(
-                `INSERT OR REPLACE INTO ayats 
-                 (nomorSurah, nomorAyat, teksArab, teksLatin, teksIndonesia)
-                 VALUES (?, ?, ?, ?, ?)`,
-                [
-                  verse.chapter_number,
-                  verse.verse_number,
-                  verse.text_uthmani,
-                  verse.text_imlaei,
-                  translation?.text || "",
-                ]
-              );
-            }
+          const ayats = detailJson?.data?.ayat ?? [];
+
+          for (const ayat of ayats) {
+            await this.db!.runAsync(
+              `
+              INSERT OR REPLACE INTO ayats
+              (
+                nomorSurah,
+                nomorAyat,
+                teksArab,
+                teksLatin,
+                teksIndonesia
+              )
+              VALUES (?, ?, ?, ?, ?)
+              `,
+              [
+                surah.nomor,
+                ayat.nomorAyat,
+                ayat.teksArab,
+                ayat.teksLatin,
+                ayat.teksIndonesia,
+              ],
+            );
           }
 
-          console.log(`📊 Imported Surah ${surahNum}/${totalSurahs}`);
+          onProgress?.({
+            completed: surah.nomor,
+            total: totalSurahs,
+          });
         } catch (error) {
-          console.warn(`⚠️ Failed to import surah ${surahNum}:`, error);
+          console.error(`❌ Failed importing Surah ${surah.nomor}`, error);
         }
       }
 
-      // Save metadata
-      await this.db?.runAsync(
-        `INSERT OR REPLACE INTO db_metadata (key, value) VALUES (?, ?)`,
-        ["last_import", new Date().toISOString()]
+      await this.db!.runAsync(
+        `
+        INSERT OR REPLACE INTO db_metadata
+        (key,value)
+        VALUES (?,?)
+        `,
+        ["quran_imported", "true"],
       );
 
-      console.log("✅ All Quran data imported successfully");
+      await this.db!.runAsync(
+        `
+        INSERT OR REPLACE INTO db_metadata
+        (key,value)
+        VALUES (?,?)
+        `,
+        ["last_import", new Date().toISOString()],
+      );
+
+      console.log("🎉 Quran import completed");
     } catch (error) {
-      console.error("❌ Failed to import quran data:", error);
+      console.error("❌ Quran import failed", error);
       throw error;
+    } finally {
+      this.isImporting = false;
     }
   }
 
-  async getAyah(surah: number, ayah: number): Promise<AyahData | null> {
+  async getAllSurahs(): Promise<Quran[]> {
     if (!this.db) await this.initialize();
 
-    try {
-      const result = await this.db?.getFirstAsync<AyahData>(
-        `SELECT nomorSurah, nomorAyat, teksArab, teksLatin, teksIndonesia
-         FROM ayats
-         WHERE nomorSurah = ? AND nomorAyat = ?
-         LIMIT 1`,
-        [surah, ayah]
-      );
-      return result || null;
-    } catch (error) {
-      console.error("Error fetching ayah:", error);
-      return null;
-    }
+    return await this.db!.getAllAsync<Quran>(
+      `
+      SELECT *
+      FROM surahs
+      ORDER BY nomor ASC
+      `,
+    );
   }
 
   async getAyahsBySurah(surah: number): Promise<AyahData[]> {
     if (!this.db) await this.initialize();
 
-    try {
-      const results = await this.db?.getAllAsync<AyahData>(
-        `SELECT nomorSurah, nomorAyat, teksArab, teksLatin, teksIndonesia
-         FROM ayats
-         WHERE nomorSurah = ?
-         ORDER BY nomorAyat ASC`,
-        [surah]
-      );
-      return results || [];
-    } catch (error) {
-      console.error("Error fetching surahs ayahs:", error);
-      return [];
-    }
+    return await this.db!.getAllAsync<AyahData>(
+      `
+      SELECT
+        nomorSurah,
+        nomorAyat,
+        teksArab,
+        teksLatin,
+        teksIndonesia
+      FROM ayats
+      WHERE nomorSurah = ?
+      ORDER BY nomorAyat ASC
+      `,
+      [surah],
+    );
   }
-
-  async searchAyahs(query: string): Promise<AyahData[]> {
+  async getSurahDetail(surahId: number) {
     if (!this.db) await this.initialize();
 
-    try {
-      const results = await this.db?.getAllAsync<AyahData>(
-        `SELECT nomorSurah, nomorAyat, teksArab, teksLatin, teksIndonesia
-         FROM ayats
-         WHERE teksArab LIKE ? OR teksIndonesia LIKE ?
-         LIMIT 50`,
-        [`%${query}%`, `%${query}%`]
-      );
-      return results || [];
-    } catch (error) {
-      console.error("Error searching ayahs:", error);
-      return [];
+    const surah = await this.db!.getFirstAsync<any>(
+      `
+    SELECT *
+    FROM surahs
+    WHERE nomor = ?
+    LIMIT 1
+    `,
+      [surahId],
+    );
+
+    if (!surah) {
+      return null;
     }
+
+    const ayats = await this.db!.getAllAsync<any>(
+      `
+    SELECT
+      nomorAyat,
+      teksArab,
+      teksLatin,
+      teksIndonesia
+    FROM ayats
+    WHERE nomorSurah = ?
+    ORDER BY nomorAyat ASC
+    `,
+      [surahId],
+    );
+
+    return {
+      ...surah,
+      ayat: ayats.map((a) => ({
+        nomorAyat: a.nomorAyat,
+        teksArab: a.teksArab,
+        teksIndonesia: a.teksIndonesia,
+        teksLatin: a.teksLatin,
+
+        // compatibility dengan komponen lama
+        number: a.nomorAyat,
+        numberInSurah: a.nomorAyat,
+        text: a.teksArab,
+        textIndonesian: a.teksIndonesia,
+
+        audio: {},
+      })),
+    };
   }
 
-  async getAllSurahs(): Promise<any[]> {
+  async getAyah(surah: number, ayah: number): Promise<AyahData | null> {
     if (!this.db) await this.initialize();
 
-    try {
-      const results = await this.db?.getAllAsync(
-        `SELECT id, nomor, nama, namaLatin, jumlahAyat, tempatTurun, arti
-         FROM surahs
-         ORDER BY nomor ASC`
-      );
-      return results || [];
-    } catch (error) {
-      console.error("Error fetching all surahs:", error);
-      return [];
-    }
+    const result = await this.db!.getFirstAsync<AyahData>(
+      `
+        SELECT
+          nomorSurah,
+          nomorAyat,
+          teksArab,
+          teksLatin,
+          teksIndonesia
+        FROM ayats
+        WHERE nomorSurah = ?
+        AND nomorAyat = ?
+        LIMIT 1
+        `,
+      [surah, ayah],
+    );
+
+    return result ?? null;
   }
 
-  async close(): Promise<void> {
-    if (this.db) {
-      await this.db.closeAsync();
-      this.db = null;
-      this.isInitialized = false;
-    }
+  async searchAyahs(keyword: string): Promise<AyahData[]> {
+    if (!this.db) await this.initialize();
+
+    return await this.db!.getAllAsync<AyahData>(
+      `
+      SELECT
+        nomorSurah,
+        nomorAyat,
+        teksArab,
+        teksLatin,
+        teksIndonesia
+      FROM ayats
+      WHERE
+        teksArab LIKE ?
+        OR teksIndonesia LIKE ?
+      LIMIT 50
+      `,
+      [`%${keyword}%`, `%${keyword}%`],
+    );
+  }
+
+  async getLastImportDate() {
+    if (!this.db) await this.initialize();
+
+    const result = await this.db!.getFirstAsync<{
+      value: string;
+    }>(
+      `
+        SELECT value
+        FROM db_metadata
+        WHERE key = ?
+        `,
+      ["last_import"],
+    );
+
+    return result?.value ?? null;
+  }
+
+  async close() {
+    if (!this.db) return;
+
+    await this.db.closeAsync();
+
+    this.db = null;
+    this.isInitialized = false;
+    this.initPromise = null;
   }
 }
 
 export const quranDB = new QuranDatabaseService();
+
+export default QuranDatabaseService;

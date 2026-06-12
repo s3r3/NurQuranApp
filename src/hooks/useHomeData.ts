@@ -1,34 +1,33 @@
-import { useQuery } from "@tanstack/react-query";
-import { fetchSurahsWithCache } from "../api/quranApi";
 import { useAppStore } from "../store/useAppStore";
 
 export const useHomeData = () => {
-  const { lastRead } = useAppStore();
-
   const {
-    data: surahs,
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useQuery({
-    queryKey: ["surahs"],
-    queryFn: fetchSurahsWithCache,
-    staleTime: 1000 * 60 * 60, // 1 hour
-    gcTime: 1000 * 60 * 60 * 24, // 24 hours
-    retry: 2,
-  });
-
-  const hasLastRead = !!lastRead;
-  const lastReadData = lastRead || null;
+    lastRead,
+    allSurahs,
+    isDataLoaded,
+    isQuranDownloading,
+    quranDownloadProgress,
+    quranDownloadError,
+  } = useAppStore();
+  const hasSurahs = allSurahs.length > 0;
 
   return {
-    surahs: surahs || [],
-    isLoading,
-    isError,
-    error,
-    refetch,
-    hasLastRead,
-    lastReadData,
+    surahs: allSurahs,
+
+    isLoading: !isDataLoaded || (isQuranDownloading && !hasSurahs),
+
+    isError: !!quranDownloadError && !hasSurahs,
+
+    error: quranDownloadError ? new Error(quranDownloadError) : null,
+
+    refetch: async () => {},
+
+    isQuranDownloading,
+
+    quranDownloadProgress,
+
+    hasLastRead: !!lastRead,
+
+    lastReadData: lastRead,
   };
 };

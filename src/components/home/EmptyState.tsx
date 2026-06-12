@@ -7,12 +7,16 @@ interface EmptyStateProps {
   isLoading?: boolean;
   error?: Error | null;
   onRetry?: () => void;
+  message?: string;
+  progress?: number;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
   isLoading,
   error,
   onRetry,
+  message,
+  progress,
 }) => {
   const { t } = useTranslation();
   const colors = useHomeColors();
@@ -21,7 +25,14 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color={colors.PRIMARY} />
-        <Text style={[styles.text, { color: colors.TEXT_SECONDARY }]}>{t("Loading surahs")}...</Text>
+        <Text style={[styles.text, { color: colors.TEXT_SECONDARY }]}>
+          {message || `${t("Loading surahs")}...`}
+        </Text>
+        {typeof progress === "number" && (
+          <Text style={[styles.progressText, { color: colors.PRIMARY }]}>
+            {Math.round(progress)}%
+          </Text>
+        )}
       </View>
     );
   }
@@ -57,6 +68,12 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 16,
     marginTop: 12,
+    textAlign: "center",
+  },
+  progressText: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginTop: 8,
   },
   errorText: {
     color: "#FF6B6B",

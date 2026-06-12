@@ -13,6 +13,7 @@ import { useTranslation } from "react-i18next";
 import { useHomeColors } from "../constants/home.constants";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { HomeTab, SurahHome } from "../types/quran.types";
+import { getSurahMeaning } from "../utils/surahMeaning";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -45,7 +46,7 @@ const PARA_DATA: Para[] = Array.from({ length: 30 }, (_, index) => {
 
 export const SurahList: React.FC<SurahListProps> = ({ surahs }) => {
   const navigation = useNavigation<NavigationProp>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const colors = useHomeColors();
 
   const renderSurahItem = useCallback(
@@ -76,7 +77,7 @@ export const SurahList: React.FC<SurahListProps> = ({ surahs }) => {
 
           <View style={styles.detailRow}>
             <Text style={[styles.itemSub, { color: colors.TEXT_SECONDARY }]} numberOfLines={1}>
-              {item.arti}
+              {getSurahMeaning(item.nomor, item.arti, i18n.language)}
             </Text>
             <Text style={[styles.itemMeta, { color: colors.TEXT_SECONDARY }]} numberOfLines={1}>
               {item.tempatTurun} • {item.jumlahAyat} {t("Ayahs")}
@@ -87,7 +88,7 @@ export const SurahList: React.FC<SurahListProps> = ({ surahs }) => {
         <ChevronRight color={colors.TEXT_SECONDARY} size={20} />
       </TouchableOpacity>
     ),
-    [colors, navigation, t]
+    [colors, i18n.language, navigation, t]
   );
 
   const keyExtractor = useCallback(

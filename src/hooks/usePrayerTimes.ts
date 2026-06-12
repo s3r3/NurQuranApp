@@ -3,7 +3,15 @@ import { useAppStore } from "../store/useAppStore";
 import { usePrayerLocation } from "./usePrayerLocation";
 import { usePrayerOffline } from "./usePrayerOffline";
 import { API_CONFIG } from "../constants/prayer.constants";
-import { PrayerTimesResponse } from "../types/quran.types";
+import { PrayerTimes, PrayerTimings, PrayerTimesResponse } from "../types/quran.types";
+
+const normalizePrayerTimes = (timings: PrayerTimings): PrayerTimes => ({
+  Fajr: timings.Fajr,
+  Dhuhr: timings.Dhuhr,
+  Asr: timings.Asr,
+  Maghrib: timings.Maghrib,
+  Isha: timings.Isha,
+});
 
 export const usePrayerTimes = () => {
   const { setPrayerData, setLocation } = useAppStore();
@@ -28,6 +36,15 @@ export const usePrayerTimes = () => {
       }
 
       setLocation(locationData.latitude, locationData.longitude);
+
+      const cached = await getCachedPrayerData(locationData.name);
+
+      if (cached && !cached.isExpired) {
+        console.log("📱 Using today's cached prayer times");
+        setPrayerData(cached.times, locationData.name);
+        setIsUsingCache(true);
+        return;
+      }
 
       const url =
         `${API_CONFIG.ALADHAN_BASE_URL}` +
@@ -55,15 +72,17 @@ export const usePrayerTimes = () => {
         const json: PrayerTimesResponse = await response.json();
 
         if (json.code === 200 && json.data) {
+          const prayerTimes = normalizePrayerTimes(json.data.timings);
+
           // Cache the new data
           await cachePrayerData(
-            json.data.timings,
+            prayerTimes,
             locationData.name,
             locationData.latitude,
             locationData.longitude,
           );
 
-          setPrayerData(json.data.timings, locationData.name);
+          setPrayerData(prayerTimes, locationData.name);
         } else {
           throw new Error("Invalid response from API");
         }

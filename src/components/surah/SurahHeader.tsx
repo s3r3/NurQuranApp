@@ -5,9 +5,11 @@ import { QariSelector } from "./QariSelector";
 import { AudioControls } from "./AudioControls";
 import { COLORS } from "../../constants/colors";
 import { useTranslation } from "react-i18next";
+import { getSurahMeaning } from "../../utils/surahMeaning";
 
 interface SurahHeaderProps {
   surah: {
+    nomor?: number;
     nama: string;
     namaLatin: string;
     arti: string;
@@ -39,13 +41,15 @@ export const SurahHeader: React.FC<SurahHeaderProps> = ({
   onSkipNext,
   totalAyahs,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   return (
     <View style={styles.bannerCard}>
       <Text style={styles.bannerArabic}>{surah.nama}</Text>
       <Text style={styles.bannerTitle}>{surah.namaLatin}</Text>
-      <Text style={styles.bannerSub}>{surah.arti}</Text>
+      <Text style={styles.bannerSub}>
+        {getSurahMeaning(surah.nomor, surah.arti, i18n.language)}
+      </Text>
       <View style={styles.divider} />
       <Text style={styles.bannerInfo}>
         {surah.tempatTurun.toUpperCase()} • {surah.jumlahAyat} {t("AYAT")}

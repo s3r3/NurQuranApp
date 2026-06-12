@@ -37,10 +37,18 @@ interface AppStore {
   isOfflineMode: boolean;
   quranDBReady: boolean;
   lastSyncTime: number | null;
+  isQuranDownloading: boolean;
+  quranDownloadProgress: number;
+  quranDownloadError: string | null;
 
   setOfflineMode: (enabled: boolean) => void;
   setQuranDBReady: (ready: boolean) => void;
   setLastSyncTime: (time: number) => void;
+  setQuranDownloadState: (state: {
+    isDownloading?: boolean;
+    progress?: number;
+    error?: string | null;
+  }) => void;
 
   // ===== QURAN =====
   bookmarks: Bookmark[];
@@ -52,6 +60,7 @@ interface AppStore {
   isDataLoaded: boolean;
 
   setAllSurahs: (data: any[]) => void;
+  resetQuranDataState: () => void;
   addToHistory: (keyword: string) => void;
 
   addBookmark: (bookmark: Bookmark) => void;
@@ -106,13 +115,25 @@ export const useAppStore = create<AppStore>()(
       completeOnboarding: () => set({ isFirstTime: false }),
 
       /* ===== OFFLINE MODE ===== */
-      isOfflineMode: true, // Default to offline mode
+      isOfflineMode: false,
       quranDBReady: false,
       lastSyncTime: null,
+      isQuranDownloading: false,
+      quranDownloadProgress: 0,
+      quranDownloadError: null,
 
       setOfflineMode: (enabled) => set({ isOfflineMode: enabled }),
       setQuranDBReady: (ready) => set({ quranDBReady: ready }),
       setLastSyncTime: (time) => set({ lastSyncTime: time }),
+      setQuranDownloadState: (state) =>
+        set((current) => ({
+          isQuranDownloading:
+            state.isDownloading ?? current.isQuranDownloading,
+          quranDownloadProgress:
+            state.progress ?? current.quranDownloadProgress,
+          quranDownloadError:
+            state.error === undefined ? current.quranDownloadError : state.error,
+        })),
 
       /* ===== QURAN ===== */
       bookmarks: [],
@@ -134,6 +155,12 @@ export const useAppStore = create<AppStore>()(
         }),
 
       setAllSurahs: (data) => set({ allSurahs: data, isDataLoaded: true }),
+      resetQuranDataState: () =>
+        set({
+          allSurahs: [],
+          isDataLoaded: false,
+          quranDBReady: false,
+        }),
 
       addToHistory: (keyword) =>
         set((state) => ({

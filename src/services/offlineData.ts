@@ -1,6 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { quranDB } from "./quranDatabase";
-import { prayerCache } from "./prayerCache";
 
 interface OfflineStatus {
   quranReady: boolean;
@@ -14,7 +13,6 @@ class OfflineDataService {
   private initPromise: Promise<void> | null = null;
 
   async initialize(): Promise<void> {
-    // Prevent multiple simultaneous initialization attempts
     if (this.isInitializing) {
       return this.initPromise || Promise.resolve();
     }
@@ -37,25 +35,11 @@ class OfflineDataService {
     try {
       console.log("🔄 Initializing offline data service...");
 
-      // Initialize Quran database
+      // Database init cepat
       await quranDB.initialize();
 
-      // Check if Quran data exists
-      const hasQuranData = await quranDB.hasQuranData();
-
-      if (!hasQuranData) {
-        console.log("📥 No Quran data found. Importing from API...");
-        try {
-          await quranDB.importQuranFromAPI();
-        } catch (error) {
-          console.warn("⚠️ Failed to import Quran data:", error);
-          // App will still work but in limited mode
-        }
-      } else {
-        console.log("✅ Quran data already cached");
-      }
-
       await this.saveInitializationTime();
+
       console.log("✅ Offline data service initialized");
     } catch (error) {
       console.error("❌ Failed to initialize offline data service:", error);
@@ -74,24 +58,30 @@ class OfflineDataService {
   async getOfflineStatus(): Promise<OfflineStatus> {
     try {
       const quranReady = await quranDB.hasQuranData();
+      const keys = await AsyncStorage.getAllKeys();
+      const prayerCached = keys.some((key) =>
+        key.startsWith("prayer_times_cache_"),
+      );
 
       const initTime = await AsyncStorage.getItem("offline_init_time");
+
       const lastSyncTime = initTime ? new Date(initTime).getTime() : null;
 
-      // Estimate data size
       let totalDataSize = 0;
+
       if (quranReady) {
-        totalDataSize += 15 * 1024 * 1024; // ~15MB for Quran
+        totalDataSize += 15 * 1024 * 1024;
       }
 
       return {
         quranReady,
-        prayerCached: false, // Will be set per location
+        prayerCached,
         lastSyncTime,
         totalDataSize,
       };
     } catch (error) {
       console.error("Error getting offline status:", error);
+
       return {
         quranReady: false,
         prayerCached: false,
@@ -103,8 +93,7 @@ class OfflineDataService {
 
   async shouldShowInitialSetup(): Promise<boolean> {
     try {
-      const hasQuranData = await quranDB.hasQuranData();
-      return !hasQuranData;
+      return !(await quranDB.hasQuranData());
     } catch (error) {
       console.error("Error checking initial setup:", error);
       return false;
@@ -115,11 +104,19 @@ class OfflineDataService {
     try {
       console.log("🗑️ Clearing all offline data...");
 
-      // Close and delete database
       await quranDB.close();
+
+      const keys = await AsyncStorage.getAllKeys();
+      const cacheKeys = keys.filter(
+        (key) =>
+          key.startsWith("prayer_times_cache_") ||
+          key.startsWith("fasting_calendar_cache_"),
+      );
+
       await AsyncStorage.multiRemove([
         "offline_init_time",
         "prayer_times_cache",
+        ...cacheKeys,
       ]);
 
       console.log("✅ All offline data cleared");
@@ -134,12 +131,14 @@ class OfflineDataService {
       console.log("🔍 Verifying data integrity...");
 
       const quranReady = await quranDB.hasQuranData();
+
       if (!quranReady) {
         console.warn("⚠️ Quran data missing");
         return false;
       }
 
       console.log("✅ Data integrity verified");
+
       return true;
     } catch (error) {
       console.error("Error verifying data integrity:", error);
@@ -147,27 +146,34 @@ class OfflineDataService {
     }
   }
 
-  async getStorageInfo(): Promise<{ used: number; total: number }> {
-    // This is a simplified estimate
-    // Real implementation would use device storage APIs
+  async getStorageInfo(): Promise<{
+    used: number;
+    total: number;
+  }> {
     try {
       const keys = await AsyncStorage.getAllKeys();
+
       const data = await AsyncStorage.multiGet(keys);
 
       let used = 0;
+
       for (const [, value] of data) {
         if (value) {
-          used += value.length; // Rough estimate in bytes
+          used += value.length;
         }
       }
 
       return {
         used,
-        total: 50 * 1024 * 1024, // ~50MB available
+        total: 50 * 1024 * 1024,
       };
     } catch (error) {
       console.error("Error getting storage info:", error);
-      return { used: 0, total: 50 * 1024 * 1024 };
+
+      return {
+        used: 0,
+        total: 50 * 1024 * 1024,
+      };
     }
   }
 }

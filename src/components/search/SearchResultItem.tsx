@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { SEARCH_COLORS, SEARCH_SIZES } from "../../constants/search.constants";
 import { Surah } from "../../types/search.types";
 import { useTranslation } from "react-i18next";
+import { getSurahMeaning } from "../../utils/surahMeaning";
 
 interface SearchResultItemProps {
   item: Surah;
@@ -10,7 +11,7 @@ interface SearchResultItemProps {
 }
 
 export const SearchResultItem: React.FC<SearchResultItemProps> = memo(({ item, onPress }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   return (
     <TouchableOpacity
@@ -26,7 +27,7 @@ export const SearchResultItem: React.FC<SearchResultItemProps> = memo(({ item, o
         <View style={styles.info}>
           <Text style={styles.title}>{item.namaLatin}</Text>
           <Text style={styles.subtitle}>
-            {item.arti} • {item.jumlahAyat} {t("Ayat")}
+            {getSurahMeaning(item.nomor, item.arti, i18n.language)} • {item.jumlahAyat} {t("Ayat")}
           </Text>
         </View>
         

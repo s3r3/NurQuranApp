@@ -229,3 +229,19 @@ export interface PrayerTimesResponse {
   };
 }
 
+export interface Quran {
+  nomor: number;
+  nama: string;
+  namaLatin: string;
+  jumlahAyat: number;
+  tempatTurun: string;
+  arti: string;
+}
+
+export interface AyahData {
+  nomorSurah: number;
+  nomorAyat: number;
+  teksArab: string;
+  teksLatin: string;
+  teksIndonesia: string;
+}
