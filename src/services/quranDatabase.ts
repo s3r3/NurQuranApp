@@ -1,5 +1,9 @@
 import * as SQLite from "expo-sqlite";
 import { Quran, AyahData } from "../types/quran.types";
+import {
+  buildEquranAyahAudioSources,
+  buildEquranFullSurahAudioSources,
+} from "../utils/quranAudio";
 
 const DB_NAME = "quran.db";
 
@@ -316,6 +320,7 @@ class QuranDatabaseService {
 
     return {
       ...surah,
+      audioFull: buildEquranFullSurahAudioSources(surahId),
       ayat: ayats.map((a) => ({
         nomorAyat: a.nomorAyat,
         teksArab: a.teksArab,
@@ -328,7 +333,7 @@ class QuranDatabaseService {
         text: a.teksArab,
         textIndonesian: a.teksIndonesia,
 
-        audio: {},
+        audio: buildEquranAyahAudioSources(surahId, a.nomorAyat),
       })),
     };
   }
