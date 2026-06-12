@@ -52,7 +52,7 @@
         <b>Brand</b>
       </td>
       <td align="center" width="33%">
-        <img src="https://readme-typing-svg.demolab.com?font=Inter&weight=700&size=18&duration=2000&pause=600&color=22C55E&center=true&vCenter=true&width=260&height=120&lines=Read;Reflect;Remember;Repeat" alt="NurQuran motion preview" />
+        <img src="assets/nur.mp4" />
         <br />
         <b>Motion</b>
       </td>
