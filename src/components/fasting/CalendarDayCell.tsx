@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { useTranslation } from "react-i18next";
 import { hexToRGBA, isToday } from "../../utils/calendarHelpers";
 import { CalendarDay } from "../../types/quran.types";
 import { getFastingEvent, getIslamicEvent } from "../../utils/fastingHelpers";
@@ -18,6 +19,7 @@ export const CalendarDayCell: React.FC<CalendarDayCellProps> = ({
   currentYear,
   onPress,
 }) => {
+  const { t } = useTranslation();
   const colors = useCalendarColors();
   const today = new Date();
   const isTodayDate = isToday(day.day, currentMonth, currentYear, today);
@@ -34,8 +36,8 @@ export const CalendarDayCell: React.FC<CalendarDayCellProps> = ({
     styles.dayCell,
     { backgroundColor: colors.DAY_CELL_BG },
     fastingEvent && {
-      backgroundColor: hexToRGBA(fastingEvent.color, 0.18),
-      borderLeftWidth: 3,
+      backgroundColor: hexToRGBA(fastingEvent.color, 0.1),
+      borderLeftWidth: 2,
       borderLeftColor: fastingEvent.color,
     },
     isTodayDate && {
@@ -70,7 +72,7 @@ export const CalendarDayCell: React.FC<CalendarDayCellProps> = ({
           numberOfLines={1}
           style={[styles.eventLabel, { color: fastingEvent.color }]}
         >
-          {fastingEvent.label}
+          {t(fastingEvent.label)}
         </Text>
       )}
     </TouchableOpacity>
@@ -81,32 +83,34 @@ const styles = StyleSheet.create({
   dayCell: {
     width: "14.28%",
     aspectRatio: 1,
-    borderRadius: 10,
+    borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 6,
     position: "relative",
+    paddingHorizontal: 3,
   },
   dayNumber: {
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 14,
+    fontWeight: "800",
   },
   hijriText: {
-    fontSize: 9,
-    marginTop: 2,
-    fontWeight: "600",
+    fontSize: 8,
+    marginTop: 1,
+    fontWeight: "700",
   },
   eventLabel: {
-    fontSize: 7,
+    fontSize: 6.5,
     fontWeight: "700",
-    marginTop: 2,
+    marginTop: 1,
+    textAlign: "center",
   },
   dot: {
-    width: 8,
-    height: 8,
+    width: 6,
+    height: 6,
     borderRadius: 4,
     position: "absolute",
-    top: 5,
-    right: 5,
+    top: 6,
+    right: 6,
   },
 });

@@ -29,6 +29,7 @@ export type AyatActionProps = {
   onShare: () => void;
   onPlay: () => void;
   onBookmark: () => void;
+  onBookmarkLongPress?: () => void;
 };
 // Add new types for Surah
 export type AudioSources = {
@@ -44,6 +45,7 @@ export type AyatJuzItemsProps = {
   onShare: () => void;
   onPlay: () => void;
   onBookmark: () => void;
+  onBookmarkLongPress?: () => void;
 };
 
 export type Surah = {
@@ -110,10 +112,12 @@ export type SurahHome = {
 };
 
 export type LastRead = {
+  source?: "surah" | "juz";
   surahId: number;
   surahName: string;
   nomorAyat: number;
   namaLatin: string;
+  juzId?: number;
 };
 
 export type HomeTab = "Surah" | "Para";

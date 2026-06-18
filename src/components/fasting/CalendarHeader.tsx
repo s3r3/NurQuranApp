@@ -9,6 +9,7 @@ export const CalendarHeader: React.FC = () => {
 
   return (
     <View style={styles.header}>
+      <Text style={[styles.kicker, { color: colors.PRIMARY }]}>{t("Calendar")}</Text>
       <Text style={[styles.title, { color: colors.TEXT }]}>{t("Islamic Calendar")}</Text>
       <Text style={[styles.subtitle, { color: colors.TEXT_SECONDARY }]}>
         {t("Fasting Calendar & Islamic Events")}
@@ -19,13 +20,23 @@ export const CalendarHeader: React.FC = () => {
 
 const styles = StyleSheet.create({
   header: {
-    padding: 20,
+    padding: 18,
+  },
+  kicker: {
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+    marginBottom: 8,
   },
   title: {
     fontSize: 28,
-    fontWeight: "bold",
+    fontWeight: "800",
+    letterSpacing: -0.4,
   },
   subtitle: {
     marginTop: 6,
+    fontSize: 13,
+    lineHeight: 19,
   },
 });

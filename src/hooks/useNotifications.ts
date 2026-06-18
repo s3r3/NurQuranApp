@@ -5,8 +5,6 @@ import { SchedulableTriggerInputTypes } from "expo-notifications";
 import { useTranslation } from "react-i18next";
 import {
   getNotificationDate,
-  getNotificationChannelId,
-  getNotificationTitle,
   shouldScheduleWeeklyFasting,
   isWithinNotificationLimit,
 } from "../utils/notificationHelpers";
@@ -15,7 +13,6 @@ import { CalendarDay } from "../types/quran.types";
 import {
   MAX_NOTIFICATIONS,
   NOTIFICATION_DAYS_LIMIT,
-  WEEKLY_NOTIFICATION_DAYS,
 } from "../constants/calendar.constants";
 import { MONTHS } from "../constants/calendar.constants";
 
@@ -110,12 +107,15 @@ export const useNotifications = () => {
 
             if (shouldSchedule && count < MAX_NOTIFICATIONS) {
               try {
+                const fastingLabel = t(fastingEvent.label);
+                const fastingDescription = t(fastingEvent.description);
+                const tomorrowText = t("Tomorrow");
                 await Notifications.scheduleNotificationAsync({
                   content: {
-                    title: getNotificationTitle('fasting', fastingEvent.description, true),
+                    title: `🌙 ${tomorrowText}: ${fastingDescription}`,
                     body: isSpecial
-                      ? `${t("Don't forget to make the intention for fasting tonight")}. ${t("Tomorrow")} ${day.day} ${t(MONTHS[day.month - 1])} ${day.year} ${t("is the day")} ${fastingEvent.description}.`
-                      : `${t("Don't forget to make the intention for fasting")} ${fastingEvent.label} ${t("tonight")}.`,
+                      ? `${t("Don't forget to make the intention for fasting tonight")}. ${tomorrowText} ${day.day} ${t(MONTHS[day.month - 1])} ${day.year} ${t("is the day")} ${fastingDescription}.`
+                      : `${t("Don't forget to make the intention for fasting")} ${fastingLabel} ${t("tonight")}.`,
                     data: { type: "fasting", date: day.date },
                     sound: "default",
                     ...(Platform.OS === "android" && { channelId: "fasting-reminders" }),
@@ -132,10 +132,14 @@ export const useNotifications = () => {
           // Schedule Islamic event notification
           if (eventNotifEnabled && islamicEvent && count < MAX_NOTIFICATIONS) {
             try {
+              const eventTitle = t(islamicEvent.label);
+              const eventDescription = t(islamicEvent.description);
+              const tomorrowText = t("Tomorrow");
+              const todayText = t("Today");
               await Notifications.scheduleNotificationAsync({
                 content: {
-                  title: getNotificationTitle('event', islamicEvent.label, true),
-                  body: `${islamicEvent.description}. ${t("Tomorrow")} ${day.day} ${t(MONTHS[day.month - 1])} ${day.year}.`,
+                  title: `📿 ${tomorrowText}: ${eventTitle}`,
+                  body: `${eventDescription}. ${tomorrowText} ${day.day} ${t(MONTHS[day.month - 1])} ${day.year}.`,
                   data: { type: "event", date: day.date, hijriDate: islamicEvent.hijriDate },
                   sound: "default",
                   ...(Platform.OS === "android" && { channelId: "islamic-events" }),
@@ -151,8 +155,8 @@ export const useNotifications = () => {
               if (onDayDiffSeconds > 0 && count < MAX_NOTIFICATIONS) {
                 await Notifications.scheduleNotificationAsync({
                   content: {
-                    title: getNotificationTitle('event', islamicEvent.label, false),
-                    body: `${t("Happy to commemorate")} ${islamicEvent.label}! ${islamicEvent.description}.`,
+                    title: `📿 ${todayText}: ${eventTitle}`,
+                    body: `${t("Happy to commemorate")} ${eventTitle}! ${eventDescription}.`,
                     data: { type: "event", date: day.date, hijriDate: islamicEvent.hijriDate },
                     sound: "default",
                     ...(Platform.OS === "android" && { channelId: "islamic-events" }),

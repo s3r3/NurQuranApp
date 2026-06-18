@@ -16,6 +16,7 @@ export const AyatItem: React.FC<AyatJuzItemsProps> = ({
   onShare,
   onPlay,
   onBookmark,
+  onBookmarkLongPress,
 }) => {
   const { t } = useTranslation();
 
@@ -28,6 +29,7 @@ export const AyatItem: React.FC<AyatJuzItemsProps> = ({
         onShare={onShare}
         onPlay={onPlay}
         onBookmark={onBookmark}
+        onBookmarkLongPress={onBookmarkLongPress || onBookmark}
       />
       
       <Text style={styles.surahTag}>
@@ -72,4 +74,3 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
 });
-

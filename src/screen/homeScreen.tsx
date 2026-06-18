@@ -12,6 +12,10 @@ import { useActiveTab } from "../hooks/useActiveTab";
 import { useHomeColors } from "../constants/home.constants";
 import { useTranslation } from "react-i18next";
 
+const INTRO_EXPANDED_HEIGHT = 228;
+const INTRO_COLLAPSED_HEIGHT = 170;
+const GREETING_COLLAPSE_DISTANCE = 56;
+
 const HomeScreen = () => {
   const { t } = useTranslation();
   const colors = useHomeColors();
@@ -41,20 +45,26 @@ const HomeScreen = () => {
   };
 
   const introHeight = scrollY.interpolate({
-    inputRange: [0, 120],
-    outputRange: [228, 0],
+    inputRange: [0, GREETING_COLLAPSE_DISTANCE],
+    outputRange: [INTRO_EXPANDED_HEIGHT, INTRO_COLLAPSED_HEIGHT],
     extrapolate: "clamp",
   });
 
-  const introOpacity = scrollY.interpolate({
-    inputRange: [0, 40, 120],
+  const greetingHeight = scrollY.interpolate({
+    inputRange: [0, GREETING_COLLAPSE_DISTANCE],
+    outputRange: [56, 0],
+    extrapolate: "clamp",
+  });
+
+  const greetingOpacity = scrollY.interpolate({
+    inputRange: [0, 24, GREETING_COLLAPSE_DISTANCE],
     outputRange: [1, 0.6, 0],
     extrapolate: "clamp",
   });
 
-  const introTranslateY = scrollY.interpolate({
-    inputRange: [0, 120],
-    outputRange: [0, -24],
+  const lastReadTranslateY = scrollY.interpolate({
+    inputRange: [0, GREETING_COLLAPSE_DISTANCE],
+    outputRange: [0, -6],
     extrapolate: "clamp",
   });
 
@@ -67,13 +77,24 @@ const HomeScreen = () => {
           styles.introContainer,
           {
             height: introHeight,
-            opacity: introOpacity,
-            transform: [{ translateY: introTranslateY }],
           },
         ]}
       >
-        <GreetingSection />
-        <LastReadCard lastRead={lastReadData} onPress={handleLastReadPress} />
+        <Animated.View
+          style={[
+            styles.greetingWrapper,
+            {
+              height: greetingHeight,
+              opacity: greetingOpacity,
+            },
+          ]}
+        >
+          <GreetingSection />
+        </Animated.View>
+
+        <Animated.View style={{ transform: [{ translateY: lastReadTranslateY }] }}>
+          <LastReadCard lastRead={lastReadData} onPress={handleLastReadPress} />
+        </Animated.View>
       </Animated.View>
 
       <HomeTabBar activeTab={activeTab} onTabChange={changeTab} />
@@ -109,6 +130,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   introContainer: {
+    overflow: "hidden",
+  },
+  greetingWrapper: {
     overflow: "hidden",
   },
 });

@@ -12,6 +12,7 @@ export const AyatActionBar: React.FC<AyatActionProps> = ({
   onShare,
   onPlay,
   onBookmark,
+  onBookmarkLongPress,
 }) => {
   return (
     <View style={styles.actionBar}>
@@ -29,7 +30,7 @@ export const AyatActionBar: React.FC<AyatActionProps> = ({
             fill={isPlaying ? COLORS.PRIMARY : "transparent"}
           />
         </TouchableOpacity>
-        <TouchableOpacity onPress={onBookmark}>
+        <TouchableOpacity onPress={onBookmark} onLongPress={onBookmarkLongPress}>
           <Bookmark
             color={COLORS.PRIMARY}
             size={20}

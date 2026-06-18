@@ -17,6 +17,15 @@ export const useHomeNavigation = () => {
 
   const navigateToLastRead = (lastRead: LastRead | null) => {
     if (lastRead) {
+      if (lastRead.source === "juz" && lastRead.juzId) {
+        navigation.navigate("JuzDetail", {
+          juzId: lastRead.juzId,
+          surahId: lastRead.surahId,
+          nomorAyat: lastRead.nomorAyat,
+        });
+        return;
+      }
+
       navigation.navigate("SurahDetail", {
         surahId: lastRead.surahId,
         nomorAyat: lastRead.nomorAyat,

@@ -19,13 +19,18 @@ export const CalendarWeekHeader: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    marginBottom: 10,
-    paddingHorizontal: 14,
+    marginBottom: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    marginHorizontal: 10,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.04)",
   },
   text: {
     width: "14.28%",
     textAlign: "center",
     fontWeight: "700",
     fontSize: 12,
+    letterSpacing: 0.6,
   },
 });

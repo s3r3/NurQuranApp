@@ -22,7 +22,7 @@ export type RootStackParamList = {
   BookmarkScreen: undefined;
   CollectionDetail: { collectionId: string; collectionName: string };
   SurahDetail: { surahId: number; nomorAyat?: number };
-  JuzDetail: { juzId: number };
+  JuzDetail: { juzId: number; surahId?: number; nomorAyat?: number };
   Search: undefined;
 };
 

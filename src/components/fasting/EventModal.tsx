@@ -40,13 +40,15 @@ export const EventModal: React.FC<EventModalProps> = ({
                 ]}
               />
               <Text style={[styles.title, { color: colors.TEXT }]}>
-                {event.islamicEvent.label}
+                {t(event.islamicEvent.label)}
               </Text>
-              <Text style={[styles.hijriDate, { color: colors.PRIMARY }]}>
-                {event.islamicEvent.hijriDate}
-              </Text>
+              <View style={[styles.metaPill, { backgroundColor: colors.PRIMARY_SOFT_BG }]}>
+                <Text style={[styles.hijriDate, { color: colors.PRIMARY }]}>
+                  {t(event.islamicEvent.hijriDate)}
+                </Text>
+              </View>
               <Text style={[styles.description, { color: colors.TEXT_MUTED }]}>
-                {event.islamicEvent.description}
+                {t(event.islamicEvent.description)}
               </Text>
             </>
           )}
@@ -62,15 +64,13 @@ export const EventModal: React.FC<EventModalProps> = ({
                 />
               )}
               {event.islamicEvent && (
-                <Text style={[styles.divider, { color: colors.TEXT_MUTED }]}>
-                  ------------------
-                </Text>
+                <View style={styles.sectionGap} />
               )}
               <Text style={[styles.title, { color: event.fastingEvent.color }]}>
-                {event.fastingEvent.label}
+                {t(event.fastingEvent.label)}
               </Text>
               <Text style={[styles.description, { color: colors.TEXT_MUTED }]}>
-                {event.fastingEvent.description}
+                {t(event.fastingEvent.description)}
               </Text>
             </>
           )}
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   content: {
     width: "82%",
     borderRadius: 24,
-    padding: 26,
+    padding: 24,
     alignItems: "center",
   },
   closeButton: {
@@ -135,37 +135,38 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   title: {
-    fontSize: 24,
+    fontSize: 23,
     fontWeight: "bold",
     textAlign: "center",
   },
   hijriDate: {
-    marginTop: 8,
     fontWeight: "700",
+    fontSize: 12,
+  },
+  metaPill: {
+    marginTop: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
   },
   description: {
-    marginTop: 14,
+    marginTop: 12,
     textAlign: "center",
     lineHeight: 22,
   },
   gregorianDate: {
-    marginTop: 12,
-  },
-  divider: {
-    marginVertical: 10,
-    textAlign: "center",
-    fontSize: 12,
+    marginTop: 10,
   },
   notifInfo: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 14,
+    marginTop: 12,
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 10,
+    borderRadius: 12,
     gap: 8,
   },
   notifText: {
@@ -173,12 +174,15 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   closeModalButton: {
-    marginTop: 20,
+    marginTop: 18,
     paddingHorizontal: 24,
-    paddingVertical: 10,
-    borderRadius: 10,
+    paddingVertical: 11,
+    borderRadius: 14,
   },
   closeModalText: {
     fontWeight: "bold",
+  },
+  sectionGap: {
+    height: 12,
   },
 });

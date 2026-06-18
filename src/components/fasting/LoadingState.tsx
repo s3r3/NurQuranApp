@@ -14,8 +14,13 @@ export const LoadingState: React.FC = () => {
         backgroundColor={colors.BACKGROUND}
         translucent={false}
       />
-      <ActivityIndicator size="large" color={colors.PRIMARY} />
-      <Text style={[styles.text, { color: colors.TEXT }]}>{t("Loading Islamic Calendar")}...</Text>
+      <View style={[styles.card, { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER }]}>
+        <ActivityIndicator size="large" color={colors.PRIMARY} />
+        <Text style={[styles.text, { color: colors.TEXT }]}>{t("Loading Islamic Calendar")}...</Text>
+        <Text style={[styles.subtext, { color: colors.TEXT_SECONDARY }]}>
+          {t("Preparing fasting schedule and event markers")}
+        </Text>
+      </View>
     </SafeAreaView>
   );
 };
@@ -25,8 +30,27 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  card: {
+    width: "100%",
+    maxWidth: 360,
+    borderRadius: 24,
+    paddingVertical: 28,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    borderWidth: 1,
+    gap: 8,
   },
   text: {
     marginTop: 12,
+    fontWeight: "700",
+    fontSize: 15,
+    textAlign: "center",
+  },
+  subtext: {
+    fontSize: 12,
+    textAlign: "center",
+    lineHeight: 18,
   },
 });

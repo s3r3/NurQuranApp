@@ -82,6 +82,29 @@ export const useAudioPlayer = () => {
     setCurrentPlayingIndex(0);
   }, []);
 
+  const stopAllPlayback = useCallback(async () => {
+    await cleanupSound(soundRef);
+
+    if (sound) {
+      try {
+        const status = await sound.getStatusAsync();
+        if (status.isLoaded) {
+          await sound.stopAsync();
+          await sound.unloadAsync();
+        }
+      } catch (error) {
+        console.error("Error cleaning up single audio sound:", error);
+      } finally {
+        setSound(null);
+      }
+    }
+
+    setIsPlayingFullSurah(false);
+    isPlayingFullSurahRef.current = false;
+    setPlayingAyat(null);
+    setCurrentPlayingIndex(0);
+  }, [sound]);
+
   const playAudio = async (ayatNumber: number) => {
     try {
       const audioUrl = `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${ayatNumber}.mp3`;
@@ -121,10 +144,10 @@ export const useAudioPlayer = () => {
     setSelectedQari,
     playSingleAyah,
     stopPlayback,
+    stopAllPlayback,
     setIsPlayingFullSurah,
     isPlayingFullSurahRef,
     setCurrentPlayingIndex,
     setIsLoadingAudio,
   };
 };
-

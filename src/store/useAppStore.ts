@@ -12,10 +12,12 @@ export interface Bookmark {
 }
 
 interface LastRead {
+  source?: "surah" | "juz";
   surahId: number;
   surahName: string;
   nomorAyat: number;
   namaLatin: string;
+  juzId?: number;
 }
 
 export interface Collection {

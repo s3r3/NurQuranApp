@@ -24,6 +24,10 @@ export const LastReadCard: React.FC<LastReadCardProps> = ({
   const { t } = useTranslation();
   const colors = useHomeColors();
   const hasLastRead = !!lastRead;
+  const title =
+    lastRead?.source === "juz" && lastRead.juzId
+      ? `${t("Juz")} ${lastRead.juzId}`
+      : lastRead?.namaLatin || t(DEFAULT_SURAH_NAME);
 
   return (
     <TouchableOpacity
@@ -39,8 +43,14 @@ export const LastReadCard: React.FC<LastReadCardProps> = ({
         </View>
         
         <Text style={[styles.surahName, { color: colors.PINK_ACCENT }]} numberOfLines={1}>
-          {lastRead?.namaLatin || t(DEFAULT_SURAH_NAME)}
+          {title}
         </Text>
+
+        {lastRead?.source === "juz" && (
+          <Text style={[styles.sourceText, { color: colors.TEXT_SECONDARY }]} numberOfLines={1}>
+            {lastRead.surahName} • {t("Ayah")} {lastRead.nomorAyat}
+          </Text>
+        )}
         
         <View style={styles.ayahContainer}>
           <Text style={[styles.ayahLabel, { color: colors.TEXT_PRIMARY }]}>{t("Ayah No")}:</Text>
@@ -101,6 +111,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 4,
+  },
+  sourceText: {
+    fontSize: 12,
+    fontWeight: "500",
+    marginBottom: 6,
+    opacity: 0.85,
   },
   ayahContainer: {
     flexDirection: "row",

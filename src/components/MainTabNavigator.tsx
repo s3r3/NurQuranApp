@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { View, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { TabItem } from "./bottom-tab/TabItem";
 import {
   TABS_CONFIG,
@@ -17,10 +18,16 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const { navigateToTab } = useTabNavigation();
+  const { t } = useTranslation();
   const colors = useTabColors();
 
   const paddingBottom =
     insets.bottom > 0 ? insets.bottom : TAB_SIZES.paddingVertical;
+
+  const localizedTabs = TABS_CONFIG.map((tab) => ({
+    ...tab,
+    label: t(tab.key),
+  }));
 
   return (
     <View
@@ -33,7 +40,7 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
         },
       ]}
     >
-      {TABS_CONFIG.map((tab) => (
+      {localizedTabs.map((tab) => (
         <TabItem
           key={tab.key}
           tab={tab}

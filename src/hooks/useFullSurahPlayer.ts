@@ -70,14 +70,6 @@ export const useFullSurahPlayer = (props: UseFullSurahPlayerProps) => {
 
       if (success) {
         onAyahPlay?.(currentAyah.nomorAyat);
-
-        setTimeout(() => {
-          flatListRef.current?.scrollToIndex({
-            index,
-            animated: true,
-            viewPosition: 0.3,
-          });
-        }, 200);
       } else if (isPlayingFullSurahRef.current) {
         const nextIndex = index + 1;
         if (nextIndex < surah.ayat.length) {

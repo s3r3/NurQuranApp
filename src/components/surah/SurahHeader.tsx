@@ -1,8 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Volume2, Play, Pause } from "lucide-react-native";
+import { Play, Pause } from "lucide-react-native";
 import { QariSelector } from "./QariSelector";
-import { AudioControls } from "./AudioControls";
 import { COLORS } from "../../constants/colors";
 import { useTranslation } from "react-i18next";
 import { getSurahMeaning } from "../../utils/surahMeaning";
@@ -21,11 +20,6 @@ interface SurahHeaderProps {
   isPlayingFullSurah: boolean;
   isLoadingAudio: boolean;
   onPlayFullSurah: () => void;
-  currentPlayingIndex?: number;
-  playingAyat?: number | null;
-  onSkipPrevious?: () => void;
-  onSkipNext?: () => void;
-  totalAyahs?: number;
 }
 
 export const SurahHeader: React.FC<SurahHeaderProps> = ({
@@ -35,11 +29,6 @@ export const SurahHeader: React.FC<SurahHeaderProps> = ({
   isPlayingFullSurah,
   isLoadingAudio,
   onPlayFullSurah,
-  currentPlayingIndex,
-  playingAyat,
-  onSkipPrevious,
-  onSkipNext,
-  totalAyahs,
 }) => {
   const { t, i18n } = useTranslation();
 
@@ -78,16 +67,6 @@ export const SurahHeader: React.FC<SurahHeaderProps> = ({
         </Text>
       </TouchableOpacity>
 
-      {isPlayingFullSurah && onSkipPrevious && onSkipNext && totalAyahs && (
-        <AudioControls
-          currentIndex={currentPlayingIndex ?? 0}
-          totalAyahs={totalAyahs}
-          playingAyat={playingAyat}
-          isLoading={isLoadingAudio}
-          onPrevious={onSkipPrevious}
-          onNext={onSkipNext}
-        />
-      )}
     </View>
   );
 };
@@ -95,21 +74,28 @@ export const SurahHeader: React.FC<SurahHeaderProps> = ({
 const styles = StyleSheet.create({
   bannerCard: {
     margin: 20,
-    padding: 28,
-    borderRadius: 20,
+    padding: 24,
+    borderRadius: 28,
     backgroundColor: COLORS.CARD_BACKGROUND,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.18,
+    shadowRadius: 24,
+    elevation: 10,
   },
   bannerArabic: {
     color: COLORS.TEXT,
-    fontSize: 32,
+    fontSize: 34,
     marginBottom: 8,
+    fontWeight: "700",
   },
   bannerTitle: {
     color: COLORS.TEXT,
-    fontSize: 26,
-    fontWeight: "bold",
+    fontSize: 24,
+    fontWeight: "800",
   },
   bannerSub: {
     color: COLORS.TEXT,
@@ -119,36 +105,38 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: "rgba(255,255,255,0.3)",
+    backgroundColor: "rgba(255,255,255,0.22)",
     width: "80%",
     marginVertical: 16,
   },
   bannerInfo: {
     color: COLORS.TEXT,
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: "700",
+    letterSpacing: 0.4,
   },
   bismillah: {
     color: COLORS.TEXT,
-    fontSize: 24,
+    fontSize: 22,
     marginTop: 20,
+    opacity: 0.95,
   },
   playFullButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(255, 255, 255, 0.18)",
     paddingVertical: 14,
-    paddingHorizontal: 28,
-    borderRadius: 28,
-    marginTop: 16,
+    paddingHorizontal: 24,
+    borderRadius: 999,
+    marginTop: 18,
     gap: 12,
   },
   playFullButtonActive: {
-    backgroundColor: "rgba(239, 68, 68, 0.6)",
+    backgroundColor: "rgba(239, 68, 68, 0.72)",
   },
   playFullButtonText: {
     color: COLORS.TEXT,
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "800",
   },
 });

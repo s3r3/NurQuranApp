@@ -1,54 +1,64 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { MONTHS, useCalendarColors } from "../../constants/calendar.constants";
 import { useTranslation } from "react-i18next";
 
 interface MonthSelectorProps {
   month: number;
   year: number;
-  onPrevious: () => void;
-  onNext: () => void;
 }
 
 export const MonthSelector: React.FC<MonthSelectorProps> = ({
   month,
   year,
-  onPrevious,
-  onNext,
 }) => {
   const { t } = useTranslation();
   const colors = useCalendarColors();
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={onPrevious}>
-        <Text style={[styles.navButton, { color: colors.PRIMARY }]}>‹</Text>
-      </TouchableOpacity>
-      <Text style={[styles.title, { color: colors.PRIMARY }]}>
-        {t(MONTHS[month])} {year}
-      </Text>
-      <TouchableOpacity onPress={onNext}>
-        <Text style={[styles.navButton, { color: colors.PRIMARY }]}>›</Text>
-      </TouchableOpacity>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER },
+      ]}
+    >
+      <View style={styles.titleRow}>
+        <Text style={[styles.title, { color: colors.TEXT }]}>{t(MONTHS[month])}</Text>
+        <View style={[styles.yearPill, { backgroundColor: colors.PRIMARY_SOFT_BG }]}>
+          <Text style={[styles.yearText, { color: colors.PRIMARY }]}>{year}</Text>
+        </View>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
-    marginBottom: 20,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    marginHorizontal: 16,
+    marginBottom: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 21,
+    fontWeight: "800",
+    letterSpacing: -0.2,
   },
-  navButton: {
-    fontSize: 34,
-    fontWeight: "bold",
-    paddingHorizontal: 10,
+  yearPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  yearText: {
+    fontSize: 13,
+    fontWeight: "800",
   },
 });

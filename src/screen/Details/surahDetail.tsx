@@ -11,6 +11,9 @@ import {
   StatusBar,
   Platform,
   ActivityIndicator,
+  Modal,
+  Pressable,
+  ScrollView,
 } from "react-native";
 import { ArrowLeft, Search } from "lucide-react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -24,6 +27,7 @@ import { useAudioPlayer } from "../../hooks/useAudioPlayer";
 import { useFullSurahPlayer } from "../../hooks/useFullSurahPlayer";
 import { SurahHeader } from "../../components/surah/SurahHeader";
 import { AyatItem } from "../../components/surah/AyatItemSurah";
+import { FullSurahMiniPlayer } from "../../components/surah/FullSurahMiniPlayer";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -33,6 +37,8 @@ const SurahDetail = () => {
   const flatListRef = useRef<FlatList<any> | null>(null);
   const { t, i18n } = useTranslation();
   const language = i18n.language?.includes("id") ? "id" : "en";
+  const [collectionPickerVisible, setCollectionPickerVisible] = React.useState(false);
+  const [pendingAyat, setPendingAyat] = React.useState<any | null>(null);
 
   const navigation = useNavigation<NavigationProp>();
   const { data: surah, isLoading } = useSurahDetail(surahId, language);
@@ -44,7 +50,6 @@ const SurahDetail = () => {
     setLastRead,
     collections,
     addAyatToCollection,
-    createCollection,
   } = useAppStore();
 
   const {
@@ -56,6 +61,7 @@ const SurahDetail = () => {
     setSelectedQari,
     playSingleAyah,
     stopPlayback,
+    stopAllPlayback,
     setIsPlayingFullSurah,
     isPlayingFullSurahRef,
     setCurrentPlayingIndex,
@@ -76,6 +82,7 @@ const SurahDetail = () => {
     onAyahPlay: (ayahNumber) => {
       if (surah) {
         setLastRead({
+          source: "surah",
           surahId,
           surahName: surah.nama || "",
           nomorAyat: ayahNumber,
@@ -102,6 +109,14 @@ const SurahDetail = () => {
       }
     }
   }, [surah, nomorAyat]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("blur", () => {
+      void stopAllPlayback();
+    });
+
+    return unsubscribe;
+  }, [navigation, stopAllPlayback]);
   console.log(
     "LANGUAGE:",
     language,
@@ -136,56 +151,30 @@ const SurahDetail = () => {
     }
   };
 
+  const closeCollectionPicker = useCallback(() => {
+    setCollectionPickerVisible(false);
+    setPendingAyat(null);
+  }, []);
+
+  const saveAyahToCollection = useCallback(
+    (collectionId: string, collectionName: string) => {
+      if (!pendingAyat) return;
+
+      addAyatToCollection(collectionId, {
+        surahId,
+        nomorAyat: pendingAyat.nomorAyat,
+        surahName: surah?.namaLatin || "",
+        ayahText: pendingAyat.teksArab,
+      });
+      Alert.alert(t("Saved"), t("Ayah saved to") + ` ${collectionName}`);
+      closeCollectionPicker();
+    },
+    [addAyatToCollection, closeCollectionPicker, pendingAyat, surah?.namaLatin, surahId, t],
+  );
+
   const onBookmarkLongPress = (item: any) => {
-    const currentCollections = useAppStore.getState().collections;
-    const options: any[] = currentCollections.map((c) => ({
-      text: c.name,
-      onPress: () => {
-        addAyatToCollection(c.id, {
-          surahId,
-          nomorAyat: item.nomorAyat,
-          surahName: surah?.namaLatin || "",
-          ayahText: item.teksArab,
-        });
-        Alert.alert(t("Saved"), t("Ayah saved to") + ` ${c.name}`);
-      },
-    }));
-
-    options.push({
-      text: t("+ Create New Collection"),
-      onPress: () => {
-        const collectionName =
-          Platform.OS === "ios"
-            ? undefined
-            : t("Collection") + ` ${collections.length + 1}`;
-
-        if (Platform.OS === "ios") {
-          Alert.prompt(t("New Collection"), t("Enter folder name:"), (name) => {
-            if (name) {
-              const newId = createCollection(name);
-              addAyatToCollection(newId, {
-                surahId,
-                nomorAyat: item.nomorAyat,
-                surahName: surah?.namaLatin || "",
-                ayahText: item.teksArab,
-              });
-            }
-          });
-        } else if (collectionName) {
-          const newId = createCollection(collectionName);
-          addAyatToCollection(newId, {
-            surahId,
-            nomorAyat: item.nomorAyat,
-            surahName: surah?.namaLatin || "",
-            ayahText: item.teksArab,
-          });
-          Alert.alert(t("Success"), t("Ayah saved to") + ` ${collectionName}`);
-        }
-      },
-    });
-
-    options.push({ text: t("Cancel"), onPress: () => {} });
-    Alert.alert(t("Save to Collection"), t("Choose storage folder:"), options);
+    setPendingAyat(item);
+    setCollectionPickerVisible(true);
   };
 
   const onViewableItemsChanged = useCallback(
@@ -193,6 +182,7 @@ const SurahDetail = () => {
       if (viewableItems.length > 0 && surah && !isPlayingFullSurah) {
         const firstVisibleAyat = viewableItems[0].item;
         setLastRead({
+          source: "surah",
           surahId,
           surahName: surah.nama || "",
           nomorAyat: firstVisibleAyat.nomorAyat,
@@ -202,6 +192,30 @@ const SurahDetail = () => {
     },
     [surahId, surah, setLastRead, isPlayingFullSurah],
   );
+
+  const jumpToPlayingAyah = useCallback(() => {
+    if (!surah?.ayat?.length || !isPlayingFullSurah) return;
+
+    const targetIndex = Math.min(
+      Math.max(currentPlayingIndex, 0),
+      surah.ayat.length - 1,
+    );
+
+    flatListRef.current?.scrollToIndex({
+      index: targetIndex,
+      animated: true,
+      viewPosition: 0.28,
+    });
+  }, [currentPlayingIndex, isPlayingFullSurah, surah?.ayat?.length]);
+
+  const handleToggleFullSurah = useCallback(async () => {
+    if (!isPlayingFullSurah) {
+      await playFullSurah();
+      return;
+    }
+
+    await stopPlayback();
+  }, [isPlayingFullSurah, playFullSurah, stopPlayback]);
 
   const renderAyatItem = ({ item, index }: { item: any; index: number }) => (
     <AyatItem
@@ -215,6 +229,7 @@ const SurahDetail = () => {
       onPlay={() =>
         playSingleAyah(item.audio, item.nomorAyat, () => {
           setLastRead({
+            source: "surah",
             surahId,
             surahName: surah?.nama || "",
             nomorAyat: item.nomorAyat,
@@ -292,16 +307,104 @@ const SurahDetail = () => {
               isPlayingFullSurah={isPlayingFullSurah}
               isLoadingAudio={isLoadingAudio}
               onPlayFullSurah={playFullSurah}
-              currentPlayingIndex={currentPlayingIndex}
-              playingAyat={playingAyat}
-              onSkipPrevious={skipToPrevious}
-              onSkipNext={skipToNext}
-              totalAyahs={surah.jumlahAyat}
             />
           ) : null
         }
         contentContainerStyle={styles.listContent}
       />
+
+      {isPlayingFullSurah && surah && (
+        <View style={styles.miniPlayerDock}>
+          <FullSurahMiniPlayer
+            surahName={surah.namaLatin}
+            surahMeaning={surah.arti}
+            currentIndex={currentPlayingIndex}
+            totalAyahs={surah.jumlahAyat}
+            playingAyat={playingAyat}
+            isPlaying={isPlayingFullSurah}
+            isLoading={isLoadingAudio}
+            onPlayPause={handleToggleFullSurah}
+            onPrevious={skipToPrevious}
+            onNext={skipToNext}
+            onPressCard={jumpToPlayingAyah}
+          />
+        </View>
+      )}
+
+      <Modal
+        transparent
+        animationType="fade"
+        visible={collectionPickerVisible}
+        onRequestClose={closeCollectionPicker}
+      >
+        <Pressable style={styles.modalBackdrop} onPress={closeCollectionPicker}>
+          <View style={styles.collectionSheet} onStartShouldSetResponder={() => true}>
+            <View style={styles.sheetHeader}>
+              <View style={styles.sheetTitleWrap}>
+                <Text style={styles.sheetTitle}>{t("Save to Collection")}</Text>
+                <Text style={styles.sheetSubtitle}>
+                  {t("Choose storage folder:")}
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                onPress={closeCollectionPicker}
+                style={styles.closeButton}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.closeButtonText}>×</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.collectionList}
+            >
+              {collections.length > 0 ? (
+                collections.map((collection) => (
+                  <TouchableOpacity
+                    key={collection.id}
+                    style={styles.collectionRow}
+                    onPress={() =>
+                      saveAyahToCollection(collection.id, collection.name)
+                    }
+                    activeOpacity={0.85}
+                  >
+                    <View style={styles.collectionRowText}>
+                      <Text style={styles.collectionName}>{collection.name}</Text>
+                      <Text style={styles.collectionMeta}>
+                        {collection.items?.length || 0} {t("items")}
+                      </Text>
+                    </View>
+                    <View style={styles.collectionPill}>
+                      <Text style={styles.collectionPillText}>
+                        {t("Save")}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyTitle}>
+                    {t("No bookmarks or collections yet")}
+                  </Text>
+                  <Text style={styles.emptySubtitle}>
+                    {t("You can close this popup and create a collection from the Bookmark page.")}
+                  </Text>
+                </View>
+              )}
+            </ScrollView>
+
+            <TouchableOpacity
+              style={styles.cancelSheetButton}
+              onPress={closeCollectionPicker}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.cancelSheetButtonText}>{t("Cancel")}</Text>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -324,7 +427,15 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   listContent: {
-    paddingBottom: 40,
+    paddingBottom: 180,
+  },
+  miniPlayerDock: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 14,
+    paddingBottom: 14,
   },
   loadingContainer: {
     flex: 1,
@@ -336,6 +447,125 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 16,
     fontSize: 16,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(3, 7, 18, 0.72)",
+    justifyContent: "flex-end",
+  },
+  collectionSheet: {
+    backgroundColor: "#101A3A",
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingTop: 18,
+    paddingHorizontal: 18,
+    paddingBottom: 24,
+    minHeight: "44%",
+    borderTopWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+  },
+  sheetHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 12,
+    marginBottom: 16,
+  },
+  sheetTitleWrap: {
+    flex: 1,
+  },
+  sheetTitle: {
+    color: COLORS.TEXT,
+    fontSize: 20,
+    fontWeight: "800",
+  },
+  sheetSubtitle: {
+    color: COLORS.SECONDARY,
+    marginTop: 4,
+    fontSize: 13,
+  },
+  closeButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  closeButtonText: {
+    color: COLORS.TEXT,
+    fontSize: 24,
+    lineHeight: 24,
+    marginTop: -2,
+  },
+  collectionList: {
+    paddingBottom: 12,
+    gap: 10,
+  },
+  collectionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderRadius: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
+  },
+  collectionRowText: {
+    flex: 1,
+    paddingRight: 12,
+  },
+  collectionName: {
+    color: COLORS.TEXT,
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  collectionMeta: {
+    color: COLORS.SECONDARY,
+    marginTop: 4,
+    fontSize: 12,
+  },
+  collectionPill: {
+    backgroundColor: COLORS.PRIMARY,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+  },
+  collectionPillText: {
+    color: COLORS.TEXT,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  emptyState: {
+    paddingVertical: 24,
+    alignItems: "center",
+  },
+  emptyTitle: {
+    color: COLORS.TEXT,
+    fontSize: 16,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+  emptySubtitle: {
+    color: COLORS.SECONDARY,
+    fontSize: 13,
+    lineHeight: 20,
+    textAlign: "center",
+    marginTop: 8,
+  },
+  cancelSheetButton: {
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderRadius: 16,
+    alignItems: "center",
+    paddingVertical: 14,
+    marginTop: 4,
+  },
+  cancelSheetButtonText: {
+    color: COLORS.TEXT,
+    fontSize: 15,
+    fontWeight: "700",
   },
 });
 

@@ -6,6 +6,7 @@ import {
   ScrollView,
   StatusBar,
   Platform,
+  PanResponder,
 } from "react-native";
 import { useCalendarColors } from "../constants/calendar.constants";
 import { useFastingCalendar } from "../hooks/useFastingCalendar";
@@ -34,7 +35,25 @@ const FastingScreen = () => {
     goToNextYear,
     goToPreviousMonth,
     goToNextMonth,
+    goToToday,
   } = useCalendarNavigation();
+
+  const calendarPanResponder = React.useMemo(
+    () =>
+      PanResponder.create({
+        onMoveShouldSetPanResponder: (_event, gestureState) =>
+          Math.abs(gestureState.dx) > Math.abs(gestureState.dy) &&
+          Math.abs(gestureState.dx) > 12,
+        onPanResponderRelease: (_event, gestureState) => {
+          if (gestureState.dx < -40) {
+            goToNextMonth();
+          } else if (gestureState.dx > 40) {
+            goToPreviousMonth();
+          }
+        },
+      }),
+    [goToNextMonth, goToPreviousMonth],
+  );
 
   const { calendarData, loading, refetch } = useFastingCalendar(selectedYear);
   const {
@@ -109,36 +128,45 @@ const FastingScreen = () => {
         translucent={false}
       />
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <CalendarHeader />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.heroCard}>
+          <CalendarHeader />
+          <NotificationSettings
+            fastingEnabled={fastingNotifEnabled}
+            onFastingToggle={setFastingNotifEnabled}
+            eventEnabled={eventNotifEnabled}
+            onEventToggle={setEventNotifEnabled}
+            scheduledCount={scheduledCount}
+            isScheduling={isScheduling}
+          />
+        </View>
 
-        <NotificationSettings
-          fastingEnabled={fastingNotifEnabled}
-          onFastingToggle={setFastingNotifEnabled}
-          eventEnabled={eventNotifEnabled}
-          onEventToggle={setEventNotifEnabled}
-          scheduledCount={scheduledCount}
-          isScheduling={isScheduling}
-        />
+        <View style={styles.controlCard}>
+          <View style={styles.controlHeader}>
+            <YearSelector
+              year={selectedYear}
+              onPrevious={goToPreviousYear}
+              onNext={goToNextYear}
+              onToday={goToToday}
+            />
+          </View>
 
-        <YearSelector
-          year={selectedYear}
-          onPrevious={goToPreviousYear}
-          onNext={goToNextYear}
-        />
+          <MonthSelector month={selectedMonth} year={selectedYear} />
+        </View>
 
-        <CalendarLegend />
+        <View style={styles.legendCard}>
+          <CalendarLegend />
+        </View>
 
-        <MonthSelector
-          month={selectedMonth}
-          year={selectedYear}
-          onPrevious={goToPreviousMonth}
-          onNext={goToNextMonth}
-        />
-
-        <CalendarWeekHeader />
-
-        <View style={styles.grid}>{renderCalendar()}</View>
+        <View style={styles.calendarCard}>
+          <CalendarWeekHeader />
+          <View style={styles.calendarArea} {...calendarPanResponder.panHandlers}>
+            <View style={styles.grid}>{renderCalendar()}</View>
+          </View>
+        </View>
       </ScrollView>
 
       <EventModal
@@ -158,11 +186,56 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
+  scrollContent: {
+    paddingBottom: 110,
+  },
+  heroCard: {
+    marginHorizontal: 16,
+    marginTop: 10,
+    marginBottom: 14,
+    borderRadius: 28,
+    overflow: "hidden",
+    backgroundColor: "rgba(255,255,255,0.02)",
+  },
+  controlCard: {
+    marginHorizontal: 16,
+    marginBottom: 14,
+    borderRadius: 28,
+    backgroundColor: "rgba(168, 85, 247, 0.06)",
+    borderWidth: 1,
+    borderColor: "rgba(168, 85, 247, 0.12)",
+    paddingVertical: 8,
+  },
+  controlHeader: {
+    paddingTop: 2,
+  },
+  legendCard: {
+    marginHorizontal: 16,
+    marginBottom: 14,
+    borderRadius: 22,
+    backgroundColor: "rgba(255,255,255,0.03)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
+    paddingTop: 14,
+    paddingBottom: 4,
+  },
+  calendarCard: {
+    marginHorizontal: 16,
+    borderRadius: 28,
+    backgroundColor: "rgba(255,255,255,0.03)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
+    paddingTop: 14,
+    paddingBottom: 10,
+  },
+  calendarArea: {
+    marginBottom: 10,
+  },
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    paddingHorizontal: 14,
-    marginBottom: 40,
+    paddingHorizontal: 10,
+    paddingBottom: 10,
   },
   dayCellPlaceholder: {
     width: "14.28%",

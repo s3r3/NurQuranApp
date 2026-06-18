@@ -7,6 +7,11 @@ import {
   StatusBar,
   Platform,
   ScrollView,
+  Modal,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  Alert,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useAppStore } from "../store/useAppStore";
@@ -29,6 +34,9 @@ const BookmarkScreen = () => {
   const { t } = useTranslation();
   const navigation = useNavigation<any>();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+  const [collectionName, setCollectionName] = useState("");
+  const { createCollection } = useAppStore();
 
   const {
     bookmarks,
@@ -59,8 +67,33 @@ const BookmarkScreen = () => {
     };
   }, [pinnedCollections, unpinnedCollections, searchQuery]);
 
-  const { handleCreateCollection, handleCollectionLongPress } =
-    useCollectionManagement();
+  const { handleCollectionLongPress } = useCollectionManagement();
+
+  const openCreateCollectionModal = () => {
+    setCollectionName("");
+    setIsCreateModalVisible(true);
+  };
+
+  const closeCreateCollectionModal = () => {
+    setIsCreateModalVisible(false);
+    setCollectionName("");
+  };
+
+  const handleCreateCollection = () => {
+    const name = collectionName.trim();
+
+    if (!name) {
+      Alert.alert(t("Create Collection"), t("Collection name cannot be empty"));
+      return;
+    }
+
+    createCollection(name);
+    Alert.alert(
+      t("Success"),
+      `${t("Collection")} "${name}" ${t("created!")}`,
+    );
+    closeCreateCollectionModal();
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -81,7 +114,7 @@ const BookmarkScreen = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        <AddCollectionCard onPress={handleCreateCollection} />
+        <AddCollectionCard onPress={openCreateCollectionModal} />
 
         {bookmarks.length > 0 && (
           <View>
@@ -126,9 +159,55 @@ const BookmarkScreen = () => {
         )}
 
         {!hasAnyContent && (
-          <EmptyBookmarkState onCreateCollection={handleCreateCollection} />
+          <EmptyBookmarkState onCreateCollection={openCreateCollectionModal} />
         )}
       </ScrollView>
+
+      <Modal
+        transparent
+        animationType="fade"
+        visible={isCreateModalVisible}
+        onRequestClose={closeCreateCollectionModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>{t("Create Collection")}</Text>
+            <Text style={styles.modalSubtitle}>{t("Enter folder name:")}</Text>
+            <TextInput
+              value={collectionName}
+              onChangeText={setCollectionName}
+              placeholder={t("Enter folder name:")}
+              placeholderTextColor={COLORS.SECONDARY}
+              style={styles.modalInput}
+              autoFocus
+              returnKeyType="done"
+              onSubmitEditing={handleCreateCollection}
+            />
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalCancelButton]}
+                onPress={closeCreateCollectionModal}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.modalButtonText, { color: COLORS.TEXT }]}>
+                  {t("Cancel")}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalCreateButton]}
+                onPress={handleCreateCollection}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.modalButtonText, { color: COLORS.TEXT }]}>
+                  {t("Create")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <BottomTabBar active="bookmark" />
     </SafeAreaView>
@@ -143,6 +222,60 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 100,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.55)",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+  modalCard: {
+    backgroundColor: COLORS.BACKGROUND,
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: COLORS.BORDER,
+  },
+  modalTitle: {
+    color: COLORS.TEXT,
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  modalSubtitle: {
+    color: COLORS.SECONDARY,
+    marginTop: 8,
+    marginBottom: 14,
+    fontSize: 14,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: COLORS.BORDER,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    color: COLORS.TEXT,
+    fontSize: 16,
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 18,
+  },
+  modalButton: {
+    flex: 1,
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  modalCancelButton: {
+    backgroundColor: "#1B2347",
+  },
+  modalCreateButton: {
+    backgroundColor: COLORS.PRIMARY,
+  },
+  modalButtonText: {
+    fontSize: 15,
+    fontWeight: "700",
   },
 });
 

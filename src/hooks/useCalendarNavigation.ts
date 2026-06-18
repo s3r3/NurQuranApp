@@ -9,26 +9,37 @@ export const useCalendarNavigation = () => {
 
   const goToPreviousYear = useCallback(() => {
     setSelectedYear(prev => prev - 1);
-    setSelectedMonth(0);
   }, []);
 
   const goToNextYear = useCallback(() => {
     setSelectedYear(prev => prev + 1);
-    setSelectedMonth(0);
   }, []);
 
   const goToPreviousMonth = useCallback(() => {
-    setSelectedMonth(prev => prev > 0 ? prev - 1 : prev);
+    setSelectedMonth(prev => {
+      if (prev > 0) return prev - 1;
+      setSelectedYear(year => year - 1);
+      return 11;
+    });
   }, []);
 
   const goToNextMonth = useCallback(() => {
-    setSelectedMonth(prev => prev < 11 ? prev + 1 : prev);
+    setSelectedMonth(prev => {
+      if (prev < 11) return prev + 1;
+      setSelectedYear(year => year + 1);
+      return 0;
+    });
   }, []);
 
   const goToMonth = useCallback((month: number) => {
     if (month >= 0 && month <= 11) {
       setSelectedMonth(month);
     }
+  }, []);
+
+  const goToToday = useCallback(() => {
+    setSelectedYear(today.getFullYear());
+    setSelectedMonth(today.getMonth());
   }, []);
 
   return {
@@ -39,5 +50,6 @@ export const useCalendarNavigation = () => {
     goToPreviousMonth,
     goToNextMonth,
     goToMonth,
+    goToToday,
   };
 };

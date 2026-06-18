@@ -16,13 +16,15 @@ export const CalendarLegend: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <LegendItem color="#3B82F6" label={t("Monday & Thursday")} textColor={colors.TEXT_MUTED} />
-      <LegendItem color="#10B981" label={t("Ayyamul Bidh")} textColor={colors.TEXT_MUTED} />
-      <LegendItem color="#EF4444" label={t("Ashura & Arafah")} textColor={colors.TEXT_MUTED} />
-      <LegendItem color="#FBBF24" label={t("Ramadan")} textColor={colors.TEXT_MUTED} />
-      <View style={styles.legendItem}>
-        <View style={[styles.whiteDot, { backgroundColor: colors.IMPORTANT_DOT }]} />
-        <Text style={[styles.legendText, { color: colors.TEXT_MUTED }]}>{t("Important Islamic Day")}</Text>
+      <View style={styles.grid}>
+        <LegendItem color="#3B82F6" label={t("Monday & Thursday")} textColor={colors.TEXT_MUTED} />
+        <LegendItem color="#10B981" label={t("Ayyamul Bidh")} textColor={colors.TEXT_MUTED} />
+        <LegendItem color="#EF4444" label={t("Ashura & Arafah")} textColor={colors.TEXT_MUTED} />
+        <LegendItem color="#FBBF24" label={t("Ramadan")} textColor={colors.TEXT_MUTED} />
+        <View style={styles.legendItem}>
+          <View style={[styles.whiteDot, { backgroundColor: colors.IMPORTANT_DOT }]} />
+          <Text style={[styles.legendText, { color: colors.TEXT_MUTED }]}>{t("Important Islamic Day")}</Text>
+        </View>
       </View>
     </View>
   );
@@ -30,30 +32,40 @@ export const CalendarLegend: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
+    paddingHorizontal: 16,
+    marginBottom: 4,
+  },
+  grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    paddingHorizontal: 20,
-    marginBottom: 14,
+    justifyContent: "space-between",
+    columnGap: 8,
+    rowGap: 8,
   },
   legendItem: {
-    width: "50%",
+    width: "48%",
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 14,
+    backgroundColor: "rgba(255,255,255,0.035)",
   },
   legendColor: {
     width: 12,
     height: 12,
     borderRadius: 4,
-    marginRight: 8,
+    marginRight: 6,
   },
   whiteDot: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    marginRight: 8,
+    marginRight: 6,
   },
   legendText: {
-    fontSize: 12,
+    fontSize: 10,
+    fontWeight: "600",
+    flexShrink: 1,
   },
 });
