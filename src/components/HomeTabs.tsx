@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import {
-  FlatList,
+  Animated,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -20,10 +20,15 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 interface HomeTabsProps {
   activeTab: HomeTab;
   surahs: SurahHome[];
+  scrollY: Animated.Value;
 }
 
 interface SurahListProps {
   surahs: SurahHome[];
+}
+
+interface ParaListProps {
+  scrollY: Animated.Value;
 }
 
 interface Para {
@@ -44,10 +49,14 @@ const PARA_DATA: Para[] = Array.from({ length: 30 }, (_, index) => {
   };
 });
 
-export const SurahList: React.FC<SurahListProps> = ({ surahs }) => {
+export const SurahList: React.FC<SurahListProps & { scrollY: Animated.Value }> = ({ surahs, scrollY }) => {
   const navigation = useNavigation<NavigationProp>();
   const { t, i18n } = useTranslation();
   const colors = useHomeColors();
+  const onScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+    { useNativeDriver: false }
+  );
 
   const renderSurahItem = useCallback(
     ({ item }: { item: SurahHome }) => (
@@ -98,7 +107,7 @@ export const SurahList: React.FC<SurahListProps> = ({ surahs }) => {
 
   return (
     <View style={styles.container}>
-      <FlatList
+      <Animated.FlatList
         data={surahs}
         renderItem={renderSurahItem}
         keyExtractor={keyExtractor}
@@ -108,15 +117,21 @@ export const SurahList: React.FC<SurahListProps> = ({ surahs }) => {
         windowSize={5}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={<ListEmptyText text={t("No surahs available")} />}
+        scrollEventThrottle={16}
+        onScroll={onScroll}
       />
     </View>
   );
 };
 
-export const ParaList: React.FC = () => {
+export const ParaList: React.FC<ParaListProps> = ({ scrollY }) => {
   const navigation = useNavigation<NavigationProp>();
   const { t } = useTranslation();
   const colors = useHomeColors();
+  const onScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+    { useNativeDriver: false }
+  );
 
   const renderParaItem = useCallback(
     ({ item }: { item: Para }) => (
@@ -151,7 +166,7 @@ export const ParaList: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <FlatList
+      <Animated.FlatList
         data={PARA_DATA}
         renderItem={renderParaItem}
         keyExtractor={keyExtractor}
@@ -161,16 +176,18 @@ export const ParaList: React.FC = () => {
         windowSize={5}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={<ListEmptyText text={t("No juz found")} />}
+        scrollEventThrottle={16}
+        onScroll={onScroll}
       />
     </View>
   );
 };
 
-export const HomeTabs: React.FC<HomeTabsProps> = ({ activeTab, surahs }) => {
+export const HomeTabs: React.FC<HomeTabsProps> = ({ activeTab, surahs, scrollY }) => {
   return (
     <View style={styles.container}>
-      {activeTab === "Surah" && <SurahList surahs={surahs} />}
-      {activeTab === "Para" && <ParaList />}
+      {activeTab === "Surah" && <SurahList surahs={surahs} scrollY={scrollY} />}
+      {activeTab === "Para" && <ParaList scrollY={scrollY} />}
     </View>
   );
 };
