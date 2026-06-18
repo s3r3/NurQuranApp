@@ -10,7 +10,6 @@ interface MonthSelectorProps {
 
 export const MonthSelector: React.FC<MonthSelectorProps> = ({
   month,
-  year,
 }) => {
   const { t } = useTranslation();
   const colors = useCalendarColors();
@@ -24,9 +23,6 @@ export const MonthSelector: React.FC<MonthSelectorProps> = ({
     >
       <View style={styles.titleRow}>
         <Text style={[styles.title, { color: colors.TEXT }]}>{t(MONTHS[month])}</Text>
-        <View style={[styles.yearPill, { backgroundColor: colors.PRIMARY_SOFT_BG }]}>
-          <Text style={[styles.yearText, { color: colors.PRIMARY }]}>{year}</Text>
-        </View>
       </View>
     </View>
   );
@@ -51,14 +47,5 @@ const styles = StyleSheet.create({
     fontSize: 21,
     fontWeight: "800",
     letterSpacing: -0.2,
-  },
-  yearPill: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
-  },
-  yearText: {
-    fontSize: 13,
-    fontWeight: "800",
   },
 });

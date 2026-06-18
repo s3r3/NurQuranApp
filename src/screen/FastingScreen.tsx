@@ -153,12 +153,14 @@ const FastingScreen = () => {
               onToday={goToToday}
             />
           </View>
-
-          <MonthSelector month={selectedMonth} year={selectedYear} />
         </View>
 
         <View style={styles.legendCard}>
           <CalendarLegend />
+        </View>
+
+        <View style={styles.monthCard}>
+          <MonthSelector month={selectedMonth} year={selectedYear} />
         </View>
 
         <View style={styles.calendarCard}>
@@ -208,6 +210,9 @@ const styles = StyleSheet.create({
   },
   controlHeader: {
     paddingTop: 2,
+  },
+  monthCard: {
+    marginBottom: 14,
   },
   legendCard: {
     marginHorizontal: 16,
