@@ -36,7 +36,7 @@ export const useNotifications = () => {
       if (finalStatus !== "granted") {
         Alert.alert(
           t("Notification Permission"),
-          t("App needs notification permission to send reminders.")
+          t("App needs notification permission to send fasting reminders and Islamic event notifications.")
         );
       }
 

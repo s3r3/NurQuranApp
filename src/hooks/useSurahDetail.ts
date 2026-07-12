@@ -33,8 +33,8 @@ export const useSurahDetail = (surahId: number, language: Language) => {
       return surah;
     },
 
-    staleTime: language === "en" ? 1000 * 60 * 5 : Infinity,
-    gcTime: Infinity,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
     retry: 2,
   });
 };

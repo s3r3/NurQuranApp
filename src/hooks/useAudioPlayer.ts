@@ -62,7 +62,7 @@ export const useAudioPlayer = () => {
         } else {
           Alert.alert(
             t("Audio Error"),
-            t("Could not play audio. Please check your internet connection."),
+            t("Could not play audio. Please check your internet connection and try again."),
           );
         }
       } catch (error) {

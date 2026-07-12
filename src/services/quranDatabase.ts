@@ -19,30 +19,24 @@ class QuranDatabaseService {
   private isImporting = false;
 
   async initialize() {
-  console.log("🔵 initialize called");
 
   if (this.isInitialized && this.db) {
-    console.log("🟢 DB already initialized");
     return;
   }
 
   if (this.initPromise) {
-    console.log("🟡 Waiting existing initialization");
     return this.initPromise;
   }
 
   this.initPromise = (async () => {
-    console.log("🟠 Opening database");
 
     this.db = await SQLite.openDatabaseAsync(DB_NAME);
 
-    console.log("🟠 Creating tables");
 
     await this.createTables();
 
     this.isInitialized = true;
 
-    console.log("✅ Quran DB Ready");
   })();
 
   await this.initPromise;
@@ -130,7 +124,6 @@ class QuranDatabaseService {
     onProgress?: (progress: QuranImportProgress) => void,
   ): Promise<void> {
     if (this.isImporting) {
-      console.log("⏳ Import already running");
       return;
     }
 
@@ -141,7 +134,6 @@ class QuranDatabaseService {
         await this.initialize();
       }
 
-      console.log("📥 Fetching surah list...");
 
       const response = await fetch("https://equran.id/api/v2/surat");
 
@@ -184,11 +176,9 @@ class QuranDatabaseService {
         );
       }
 
-      console.log("✅ Surah metadata saved");
 
       for (const surah of surahs) {
         try {
-          console.log(`📥 Importing Surah ${surah.nomor}`);
 
           const detailResponse = await fetch(
             `https://equran.id/api/v2/surat/${surah.nomor}`,
@@ -248,7 +238,6 @@ class QuranDatabaseService {
         ["last_import", new Date().toISOString()],
       );
 
-      console.log("🎉 Quran import completed");
     } catch (error) {
       console.error("❌ Quran import failed", error);
       throw error;

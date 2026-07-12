@@ -4,6 +4,7 @@ import {
   Share,
   Alert,
   Text,
+  TextInput,
   StyleSheet,
   FlatList,
   SafeAreaView,
@@ -38,10 +39,11 @@ const SurahDetail = () => {
   const { t, i18n } = useTranslation();
   const language = i18n.language?.includes("id") ? "id" : "en";
   const [collectionPickerVisible, setCollectionPickerVisible] = React.useState(false);
+  const [collectionNameInput, setCollectionNameInput] = React.useState("");
   const [pendingAyat, setPendingAyat] = React.useState<any | null>(null);
 
   const navigation = useNavigation<NavigationProp>();
-  const { data: surah, isLoading } = useSurahDetail(surahId, language);
+  const { data: surah, isLoading, isError, refetch } = useSurahDetail(surahId, language);
 
   const {
     addBookmark,
@@ -50,6 +52,7 @@ const SurahDetail = () => {
     setLastRead,
     collections,
     addAyatToCollection,
+    createCollection,
   } = useAppStore();
 
   const {
@@ -99,13 +102,15 @@ const SurahDetail = () => {
         (ayat: any) => ayat.nomorAyat === nomorAyat,
       );
       if (ayatIndex !== -1 && flatListRef.current) {
-        setTimeout(() => {
+        const timer = setTimeout(() => {
           flatListRef.current?.scrollToIndex({
             index: ayatIndex,
             animated: true,
             viewPosition: 0.5,
           });
         }, 300);
+
+        return () => clearTimeout(timer);
       }
     }
   }, [surah, nomorAyat]);
@@ -117,13 +122,6 @@ const SurahDetail = () => {
 
     return unsubscribe;
   }, [navigation, stopAllPlayback]);
-  console.log(
-    "LANGUAGE:",
-    language,
-    "I18N:",
-    i18n.language
-  );
-
   const handleShare = async (item: any) => {
     try {
       const translation =
@@ -133,8 +131,8 @@ const SurahDetail = () => {
       await Share.share({
         message: `${item.teksArab}\n\n${translation}\n\n${t("From")} ${t("Surah")} ${surah?.namaLatin} (${item.nomorAyat})`,
       });
-    } catch (error) {
-      console.error("Error sharing:", error);
+    } catch (_e) {
+      // silent
     }
   };
 
@@ -154,7 +152,25 @@ const SurahDetail = () => {
   const closeCollectionPicker = useCallback(() => {
     setCollectionPickerVisible(false);
     setPendingAyat(null);
+    setCollectionNameInput("");
   }, []);
+
+  const handleCreateCollectionFromPicker = useCallback(() => {
+    const name = collectionNameInput.trim();
+    if (!name) return;
+    const id = createCollection(name);
+    setCollectionNameInput("");
+    if (pendingAyat) {
+      addAyatToCollection(id, {
+        surahId,
+        nomorAyat: pendingAyat.nomorAyat,
+        surahName: surah?.namaLatin || "",
+        ayahText: pendingAyat.teksArab,
+      });
+      Alert.alert(t("Saved"), t("Ayah saved to") + ` ${name}`);
+      closeCollectionPicker();
+    }
+  }, [collectionNameInput, createCollection, pendingAyat, surah, surahId, addAyatToCollection, t, closeCollectionPicker]);
 
   const saveAyahToCollection = useCallback(
     (collectionId: string, collectionName: string) => {
@@ -266,6 +282,32 @@ const SurahDetail = () => {
     );
   }
 
+  if (isError) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={COLORS.BACKGROUND}
+        />
+        <View style={styles.navHeader}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <ArrowLeft color={COLORS.SECONDARY} size={28} />
+          </TouchableOpacity>
+          <Text style={styles.navTitle}>{t("Error")}</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Search")}>
+            <Search color={COLORS.SECONDARY} size={28} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.errorText}>{t("Failed to load surahs")}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}>
+            <Text style={styles.retryButtonText}>{t("Retry")}</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar
@@ -286,8 +328,8 @@ const SurahDetail = () => {
 
       <FlatList
         ref={flatListRef}
-        data={surah?.ayat}
-        keyExtractor={(item) => item.nomorAyat.toString()}
+        data={surah?.ayat ?? []}
+        keyExtractor={(item: any) => item.nomorAyat?.toString() ?? ""}
         renderItem={renderAyatItem}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={{ itemVisiblePercentThreshold: 30 }}
@@ -353,6 +395,25 @@ const SurahDetail = () => {
                 activeOpacity={0.8}
               >
                 <Text style={styles.closeButtonText}>×</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.createCollectionArea}>
+              <TextInput
+                style={styles.createCollectionInput}
+                placeholder={t("New Collection")}
+                placeholderTextColor={COLORS.SECONDARY}
+                value={collectionNameInput}
+                onChangeText={setCollectionNameInput}
+                returnKeyType="done"
+                onSubmitEditing={handleCreateCollectionFromPicker}
+              />
+              <TouchableOpacity
+                style={styles.createCollectionButton}
+                onPress={handleCreateCollectionFromPicker}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.createCollectionButtonText}>+</Text>
               </TouchableOpacity>
             </View>
 
@@ -447,6 +508,24 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 16,
     fontSize: 16,
+  },
+  errorText: {
+    color: COLORS.TEXT,
+    textAlign: "center",
+    marginTop: 16,
+    fontSize: 16,
+  },
+  retryButton: {
+    marginTop: 20,
+    backgroundColor: COLORS.PRIMARY,
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  retryButtonText: {
+    color: COLORS.TEXT,
+    fontSize: 16,
+    fontWeight: "700",
   },
   modalBackdrop: {
     flex: 1,
@@ -566,6 +645,36 @@ const styles = StyleSheet.create({
     color: COLORS.TEXT,
     fontSize: 15,
     fontWeight: "700",
+  },
+  createCollectionArea: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 12,
+  },
+  createCollectionInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: COLORS.BORDER,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    color: COLORS.TEXT,
+    fontSize: 14,
+  },
+  createCollectionButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.PRIMARY,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  createCollectionButtonText: {
+    color: COLORS.TEXT,
+    fontSize: 24,
+    fontWeight: "700",
+    lineHeight: 26,
   },
 });
 

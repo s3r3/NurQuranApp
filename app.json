@@ -20,7 +20,12 @@
       "expo-font"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.s3r3r.nurquran",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "NurQuran uses your location to calculate accurate prayer times.",
+        "NSUserNotificationsUsageDescription": "NurQuran sends notifications for prayer reminders, fasting reminders, and Islamic event alerts."
+      }
     },
     "android": {
       "adaptiveIcon": {

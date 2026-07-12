@@ -109,8 +109,8 @@ const JuzDetail = () => {
       await Share.share({
         message: `${item.text}\n\n${translation}\n\n${t("From")} ${item.surah?.englishName || t("Surah")} - ${t("Juz")} ${juzId}`,
       });
-    } catch (error) {
-      console.error("Error sharing:", error);
+    } catch (_e) {
+      // silent
     }
   };
 

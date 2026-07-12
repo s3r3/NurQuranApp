@@ -30,18 +30,10 @@ export const preloadQuranData = async () => {
         progress: 100,
         error: null,
       });
-
-      console.log(
-        `📖 Loaded ${localSurahs.length} surahs from SQLite`
-      );
     } else if (!imported) {
       try {
         const onlineSurahs = await fetchAllSurahs();
         setAllSurahs(onlineSurahs);
-
-        console.log(
-          `🌐 Loaded ${onlineSurahs.length} surahs from API while offline data downloads`
-        );
       } catch (error) {
         console.warn(
           "⚠️ Failed loading online surah list while offline data downloads",
@@ -57,10 +49,6 @@ export const preloadQuranData = async () => {
         progress: 0,
         error: null,
       });
-
-      console.log(
-        "📥 Starting Quran background download..."
-      );
 
       // JANGAN AWAIT
       quranDB
@@ -85,10 +73,6 @@ export const preloadQuranData = async () => {
             progress: 100,
             error: null,
           });
-
-          console.log(
-            `🎉 Quran download finished (${updated.length} surahs)`
-          );
         })
         .catch((error) => {
           setQuranDownloadState({
@@ -107,10 +91,6 @@ export const preloadQuranData = async () => {
           backgroundImportStarted = false;
         });
     }
-
-    console.log(
-      "✅ preloadQuranData completed"
-    );
   } catch (error) {
     useAppStore.getState().setQuranDownloadState({
       isDownloading: false,

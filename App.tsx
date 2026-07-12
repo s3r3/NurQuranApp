@@ -8,6 +8,7 @@ import i18n from "./i18n";
 import { ThemeProvider } from "./src/contexts/ThemeContext";
 import { useOfflineInitialization } from "./src/hooks/useOfflineInitialization";
 import { View, ActivityIndicator, Text, StyleSheet } from "react-native";
+import { ErrorBoundary } from "./src/components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -26,7 +27,9 @@ export default function App() {
     <ThemeProvider>
       <I18nextProvider i18n={i18n}>
         <QueryClientProvider client={queryClient}>
-          <AppContent />
+          <ErrorBoundary>
+            <AppContent />
+          </ErrorBoundary>
         </QueryClientProvider>
       </I18nextProvider>
     </ThemeProvider>

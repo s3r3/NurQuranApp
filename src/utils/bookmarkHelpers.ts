@@ -8,10 +8,6 @@ export const getCollectionKey = (collection: CollectionBookmark): string => {
   return collection.id;
 };
 
-export const getItemCountText = (count: number, t: (key: string) => string): string => {
-  return `${count} ${t("items")}`;
-};
-
 export const sortCollectionsByPin = (collections: CollectionBookmark[]): {
   pinned: CollectionBookmark[];
   unpinned: CollectionBookmark[];

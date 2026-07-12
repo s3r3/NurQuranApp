@@ -298,8 +298,19 @@ export const useAppStore = create<AppStore>()(
         })),
     }),
     {
-      name: "app-storage", // 🔥 satu storage saja
+      name: "app-storage",
       storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({
+        isFirstTime: state.isFirstTime,
+        isOfflineMode: state.isOfflineMode,
+        bookmarks: state.bookmarks,
+        collections: state.collections,
+        lastRead: state.lastRead,
+        searchHistory: state.searchHistory,
+        location: state.location,
+        isReminderActive: state.isReminderActive,
+        isPreNotificationActive: state.isPreNotificationActive,
+      }),
     },
   ),
 );

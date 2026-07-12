@@ -116,10 +116,10 @@ const BookmarkScreen = () => {
       >
         <AddCollectionCard onPress={openCreateCollectionModal} />
 
-        {bookmarks.length > 0 && (
+        {filteredBookmarks.length > 0 && (
           <View>
             <BookmarkSectionHeader title={t("Bookmarked Ayahs")} />
-            {bookmarks.map((item) => (
+            {filteredBookmarks.map((item) => (
               <BookmarkItem
                 key={`${item.surahId}-${item.nomorAyat}`}
                 item={item}
@@ -130,10 +130,10 @@ const BookmarkScreen = () => {
           </View>
         )}
 
-        {pinnedCollections.length > 0 && (
+        {filteredCollections.pinned.length > 0 && (
           <View>
             <BookmarkSectionHeader title={t("Pinned Collections")} />
-            {pinnedCollections.map((item) => (
+            {filteredCollections.pinned.map((item) => (
               <CollectionItem
                 key={item.id}
                 item={item}
@@ -144,10 +144,10 @@ const BookmarkScreen = () => {
           </View>
         )}
 
-        {unpinnedCollections.length > 0 && (
+        {filteredCollections.unpinned.length > 0 && (
           <View>
             <BookmarkSectionHeader title={t("Collections")} />
-            {unpinnedCollections.map((item) => (
+            {filteredCollections.unpinned.map((item) => (
               <CollectionItem
                 key={item.id}
                 item={item}
